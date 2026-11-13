@@ -12,6 +12,25 @@
     </parent>
 
     <artifactId>shared-test-support</artifactId>
-    <description>Test taban sınıfları, TestDataBuilder, MockMvc araçları, container tanımları, mesajlaşma probe'ları. Servisler test scope'uyla ekler.</description>
+    <description>Test taban sınıfları, TestDataBuilder, MutableClock, ErrorCodeAssert. Servisler test scope'uyla ekler.</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-domain</artifactId>
+        </dependency>
+        <!-- Kod src/main'de olduğu için compile scope; servisler bu modülü zaten test scope'uyla ekler.
+             JUnit, Mockito, AssertJ ve Logback (spring-boot-starter-logging üzerinden) buradan gelir. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-architecture</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

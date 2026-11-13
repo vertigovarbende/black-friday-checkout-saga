@@ -1,6 +1,10 @@
 /**
- * shared-test-support: Test taban sınıfları, TestDataBuilder, MockMvc araçları, container tanımları, mesajlaşma probe'ları. ArchUnit kuralları shared-architecture modülündedir. Servisler test scope'uyla ekler.
+ * shared-test-support: test taban sınıfları ({@code LogTrackerConfiguration}, {@code OrderflowUnitTest}),
+ * {@code TestDataBuilder}, {@code MutableClock}, {@code ErrorCodeAssert}. Servisler test scope'uyla ekler; shared
+ * modüller ekleyemez (01-paket-yapisi-kararlari §3.3, kural 5). ArchUnit kuralları shared-architecture'dadır.
  *
- * Ayrıntı: docs/decisions/01-paket-yapisi-kararlari.md §3.
+ * <p>Web araçları, {@code OrderflowContainers} ve mesajlaşma araçları Faz 2'de eklenir (ROADMAP).
+ *
+ * Ayrıntı: docs/decisions/07-test-altyapisi-kararlari.md §3.1.
  */
 package com.deveyk.orderflow.shared.testsupport;

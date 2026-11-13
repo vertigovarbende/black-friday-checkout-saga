@@ -10,7 +10,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-// Not: test-support'taki ErrorCodeAssert gelince bu kontroller oraya taşınır.
+// Not: shared modüller shared-test-support'u kullanamadığı için (01-paket-yapisi-kararlari §3.3, kural 5)
+// ErrorCodeAssert yerine kontroller burada elle yazılır.
 class SharedErrorCodeTest {
 
     @Test
