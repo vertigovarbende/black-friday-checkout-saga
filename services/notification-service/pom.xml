@@ -39,6 +39,11 @@
             <artifactId>shared-test-support</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-architecture</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
