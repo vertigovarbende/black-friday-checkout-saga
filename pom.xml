@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.deveyk.orderflow</groupId>
+    <artifactId>orderflow-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>orderflow-v2</name>
+    <description>Event-driven mimari öğrenme lab'ı: Black Friday e-ticaret, checkout saga, Kafka, Redis, HikariCP primary/replica</description>
+
+    <modules>
+        <module>shared/domain</module>
+        <module>shared/application</module>
+        <module>shared/messaging</module>
+        <module>shared/outbox</module>
+        <module>shared/inbox</module>
+        <module>shared/datasource-routing</module>
+        <module>shared/web</module>
+        <module>shared/persistence</module>
+        <module>shared/observability</module>
+        <module>shared/test-support</module>
+        <module>services/order-service</module>
+        <module>services/orchestrator-service</module>
+        <module>services/product-service</module>
+        <module>services/payment-service</module>
+        <module>services/notification-service</module>
+        <module>services/feed-service</module>
+        <module>e2e-tests</module>
+    </modules>
+
+    <properties>
+        <java.version>25</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Spring Boot BOM'unun yönetmediği kütüphaneler (06-exception-kararlari §9) -->
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-collections4.version>4.6.0</commons-collections4.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- iç modüller -->
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-messaging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-outbox</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-inbox</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-datasource-routing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-persistence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-observability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-test-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- üçüncü parti -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- Docker gerektirmeyen testler: *Test → mvn test (07-test-altyapisi-kararlari §2) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <!-- Container açan testler: *IT → mvn verify. integration-test + verify hedefleri
+                 Spring Boot parent'ında tanımlı; verify olmadan IT'ler kırılsa da build yeşil görünür. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
