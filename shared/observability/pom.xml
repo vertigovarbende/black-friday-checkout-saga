@@ -12,5 +12,28 @@
     </parent>
 
     <artifactId>shared-observability</artifactId>
-    <description>CorrelationIdFilter, UseCaseObservationAspect, MdcKeys, OrderflowHeaders, TraceContextProvider. Spring Boot starter.</description>
+    <description>Gözlem altyapısı (Spring Boot starter). Şimdilik sadece TraceContextProvider; CorrelationIdFilter, UseCaseObservationAspect, MdcKeys ve OrderflowHeaders Faz 2'de gelir.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-architecture</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
