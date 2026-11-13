@@ -134,6 +134,24 @@
 
     <build>
         <plugins>
+            <!-- Lombok annotation processor olarak tanıtılır. Java 23'ten beri javac classpath'teki
+                 processor'ları kendiliğinden çalıştırmaz; yolu açıkça verilmelidir. Sürümü Spring Boot yönetir.
+                 Not: annotationProcessorPaths verildiğinde sadece buradaki processor'lar çalışır. MapStruct
+                 (mapstruct-processor + lombok-mapstruct-binding) ve spring-boot-configuration-processor
+                 gerekince buraya eklenir. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <!-- Docker gerektirmeyen testler: *Test → mvn test (07-test-altyapisi-kararlari §2) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
