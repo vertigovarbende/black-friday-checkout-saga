@@ -19,5 +19,12 @@
             <groupId>com.deveyk.orderflow</groupId>
             <artifactId>shared-domain</artifactId>
         </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

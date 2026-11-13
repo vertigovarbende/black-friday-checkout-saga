@@ -142,10 +142,11 @@ public final class OrderflowArchitectureRules {
                 .because("adapter.out dışına sadece port'lar görünür (kural 4)")
                 .allowEmptyShould(true);
 
-        // 5. İsimlendirme: handler'lar ve port'lar.
+        // 5. İsimlendirme: handler'lar ve port'lar. Arayüzler hariç: UseCaseHandler arayüzünün kendisi
+        //    shared-application'ın kök package'ındadır.
         @ArchTest
         public static final ArchRule USE_CASE_HANDLERS_IMPLEMENT_USE_CASE_HANDLER = classes()
-                .that().haveSimpleNameEndingWith("UseCaseHandler")
+                .that().haveSimpleNameEndingWith("UseCaseHandler").and().areNotInterfaces()
                 .should().beAssignableTo(USE_CASE_HANDLER)
                 .andShould().resideInAPackage("..application..handler..")
                 .because("handler'lar UseCaseHandler'ı uygular ve application.<aggregate>.handler altında durur (kural 5)")
