@@ -1,0 +1,5 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate   # şema Flyway'den gelir, Hibernate sadece doğrular (07-test-altyapisi-kararlari §17)
+    open-in-view: false
