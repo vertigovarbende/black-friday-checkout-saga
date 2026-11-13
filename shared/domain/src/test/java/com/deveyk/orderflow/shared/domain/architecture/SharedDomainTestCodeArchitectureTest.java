@@ -1,6 +1,6 @@
 package com.deveyk.orderflow.shared.domain.architecture;
 
-import com.deveyk.orderflow.shared.testsupport.architecture.OrderflowArchitectureRules;
+import com.deveyk.orderflow.shared.architecture.OrderflowArchitectureRules;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;

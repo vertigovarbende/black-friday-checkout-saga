@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.deveyk.orderflow</groupId>
+        <artifactId>orderflow-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>shared-architecture</artifactId>
+    <description>ArchUnit kuralları (OrderflowArchitectureRules). Sadece ArchUnit'e bağımlıdır; bütün modüller test scope'uyla ekler.</description>
+
+    <dependencies>
+        <!-- Kurallar src/main altında; diğer modüllere test scope'uyla geçer.
+             archunit-junit6 = ArchUnit çekirdeği + @ArchTest / @AnalyzeClasses + JUnit 6 motoru -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit6</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,4 +1,4 @@
-package com.deveyk.orderflow.shared.testsupport.architecture;
+package com.deveyk.orderflow.shared.architecture;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -27,31 +27,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noConstructors
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
-/**
- * Orderflow'un ArchUnit kuralları (01-paket-yapisi-kararlari §7, 07-test-altyapisi-kararlari §17,
- * 08-loglama-kararlari §16).
- *
- * <p>Kurallar iki gruptadır, çünkü ikisi farklı sınıf kümesiyle koşar:
- * <ul>
- *   <li>{@link MainCode}: kural 1–15 ve 20–22, sadece main kod ({@code ImportOption.DoNotIncludeTests})</li>
- *   <li>{@link TestCode}: kural 16–19, sadece test kodu ({@code ImportOption.OnlyIncludeTests})</li>
- * </ul>
- *
- * <p>Her servis iki test sınıfıyla çağırır:
- * <pre>{@code
- * @AnalyzeClasses(packagesOf = OrderServiceApplication.class, importOptions = ImportOption.DoNotIncludeTests.class)
- * class OrderArchitectureTest {
- *     @ArchTest
- *     static final ArchTests MAIN_CODE_RULES = ArchTests.in(OrderflowArchitectureRules.MainCode.class);
- * }
- * }</pre>
- *
- * <p>Tipler sınıf yerine isimle (String) verilir: {@code shared-test-support} diğer shared modüllere
- * ve JUnit / Spring / Testcontainers'a bağımlı olmadan kuralları tanımlayabilsin diye.
- *
- * <p>Her kural {@code allowEmptyShould(true)} ile tanımlıdır: kod tabanı boşken (ve bir servis bir
- * kategoriden hiç sınıf içermediğinde, örneğin facade'ı olmayan notification-service) kural kırılmaz.
- */
 public final class OrderflowArchitectureRules {
 
     // Package desenleri
@@ -79,8 +54,7 @@ public final class OrderflowArchitectureRules {
     private static final String JUNIT_PARAMETERIZED_TEST = "org.junit.jupiter.params.ParameterizedTest";
     private static final String JUNIT_DISPLAY_NAME = "org.junit.jupiter.api.DisplayName";
 
-    private static final Set<String> GENERIC_THROWABLES = Set.of(
-            "java.lang.Throwable", "java.lang.Exception", "java.lang.RuntimeException");
+    private static final Set<String> GENERIC_THROWABLES = Set.of("java.lang.Throwable", "java.lang.Exception", "java.lang.RuntimeException");
 
     private OrderflowArchitectureRules() {
     }
@@ -270,9 +244,6 @@ public final class OrderflowArchitectureRules {
                 .allowEmptyShould(true);
     }
 
-    /**
-     * Test koduna uygulanan kurallar: 16–19.
-     */
     public static final class TestCode {
 
         private TestCode() {
@@ -311,7 +282,7 @@ public final class OrderflowArchitectureRules {
                 .allowEmptyShould(true);
     }
 
-    // ------------------------------------------------------------------ yardımcı predicate / condition'lar
+    // ---------- yardımcı predicate / condition'lar
 
     private static DescribedPredicate<JavaClass> haveSimpleNameEndingWithAny(final String... suffixes) {
         return describe("have simple name ending with any of " + String.join(", ", suffixes), javaClass -> {
@@ -338,8 +309,7 @@ public final class OrderflowArchitectureRules {
 
     private static DescribedPredicate<JavaMethodCall> sleepCall() {
         return describe("Thread.sleep(..) or TimeUnit.sleep(..)", call ->
-                call.getName().equals("sleep")
-                        && (call.getTargetOwner().isEquivalentTo(Thread.class)
+                call.getName().equals("sleep") && (call.getTargetOwner().isEquivalentTo(Thread.class)
                         || call.getTargetOwner().isEquivalentTo(java.util.concurrent.TimeUnit.class)));
     }
 

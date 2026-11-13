@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.deveyk.orderflow</groupId>
-            <artifactId>shared-test-support</artifactId>
+            <artifactId>shared-architecture</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

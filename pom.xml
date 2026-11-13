@@ -29,6 +29,7 @@
         <module>shared/web</module>
         <module>shared/persistence</module>
         <module>shared/observability</module>
+        <module>shared/architecture</module>
         <module>shared/test-support</module>
         <module>services/order-service</module>
         <module>services/orchestrator-service</module>
@@ -98,6 +99,11 @@
             <dependency>
                 <groupId>com.deveyk.orderflow</groupId>
                 <artifactId>shared-observability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-architecture</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
