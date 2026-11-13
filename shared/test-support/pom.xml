@@ -13,4 +13,13 @@
 
     <artifactId>shared-test-support</artifactId>
     <description>Test taban sınıfları, TestDataBuilder, MockMvc araçları, container tanımları, mesajlaşma probe'ları ve ArchUnit kuralları. Servisler test scope'uyla ekler.</description>
+
+    <dependencies>
+        <!-- Kurallar src/main altında; servislere test scope'uyla geçer.
+             archunit-junit6 = ArchUnit çekirdeği + @ArchTest / @AnalyzeClasses + JUnit 6 motoru -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit6</artifactId>
+        </dependency>
+    </dependencies>
 </project>
