@@ -13,4 +13,23 @@
 
     <artifactId>shared-domain</artifactId>
     <description>Entity, AggregateRoot, UuidV7 ve exception hiyerarşisi. Saf Java; hiçbir bağımlılığı yoktur.</description>
+
+    <!-- Sadece test bağımlılıkları; main kod saf Java'dır -->
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
