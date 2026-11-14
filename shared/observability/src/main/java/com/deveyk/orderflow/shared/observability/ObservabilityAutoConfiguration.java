@@ -6,10 +6,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
-/**
- * shared-observability'nin bean'leri. Servislerin component scan'i {@code com.deveyk.orderflow.<servis>}
- * ile sınırlı olduğu için shared bean'ler auto-configuration ile gelir.
- */
 @AutoConfiguration
 public class ObservabilityAutoConfiguration {
 

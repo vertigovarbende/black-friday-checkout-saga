@@ -1,0 +1,198 @@
+# orderflow-v2 lokal altyapısı. Ayrıntı: docs/setup/local-development.md
+#
+#   docker compose -f infra/docker/compose.yml --profile core up -d                    altyapı
+#   docker compose -f infra/docker/compose.yml --profile core --profile tools up -d    + Kafka UI
+#   docker compose -f infra/docker/compose.yml --profile core down                     durdur (Postgres verisi kalır)
+#   docker compose -f infra/docker/compose.yml --profile core down -v                  her şeyi sıfırla
+#
+# Profiller: core (Faz 0), tools (Kafka UI). observability (Faz 2) ve cluster (Faz 5) sonra eklenir.
+# Şifreler sadece lokal ortam içindir; değiştirmek için bu klasöre bir .env yazılabilir (gitignore'da).
+
+name: orderflow
+
+x-kafka: &kafka
+  image: apache/kafka:4.2.2
+  profiles: [core]
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:29092 > /dev/null 2>&1"]
+    interval: 30s
+    timeout: 20s
+    retries: 5
+    start_period: 60s
+    start_interval: 5s
+
+x-kafka-env: &kafka-env
+  CLUSTER_ID: yf4NGCwmRZ6F4lclSBAoPg
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_MIN_INSYNC_REPLICAS: 2
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  KAFKA_HEAP_OPTS: -Xms512m -Xmx512m
+
+services:
+
+  # ------------------------------------------------------------------ Postgres
+
+  postgres-primary:
+    image: postgres:18.7
+    profiles: [core]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD:-replicator}
+      DEBEZIUM_PASSWORD: ${DEBEZIUM_PASSWORD:-debezium}
+    # wal_level=logical: Debezium (logical decoding). Fiziksel replica da bununla çalışır.
+    # max_slot_wal_keep_size: replica uzun süre kapalı kalırsa slot yüzünden WAL sınırsız birikmesin.
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c max_slot_wal_keep_size=2GB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-primary-data:/var/lib/postgresql
+      - ./postgres/primary:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres-replica:
+    image: postgres:18.7
+    profiles: [core]
+    restart: unless-stopped
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    environment:
+      REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD:-replicator}
+    # İlk açılışta primary'den pg_basebackup ile kopyalanır, sonra standby olarak çalışır.
+    entrypoint: ["bash", "/scripts/replica-entrypoint.sh"]
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-replica-data:/var/lib/postgresql
+      - ./postgres/replica:/scripts:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ------------------------------------------------------------------ Kafka (3 node, KRaft)
+  # Veri container'ın içinde durur: stop / start'ta kalır, down'da silinir. Topic'ler zaten kodla kurulur.
+
+  kafka-1:
+    <<: *kafka
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:29092,EXTERNAL://localhost:9092
+    ports:
+      - "9092:9092"
+
+  kafka-2:
+    <<: *kafka
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:29092,EXTERNAL://localhost:9094
+    ports:
+      - "9094:9094"
+
+  kafka-3:
+    <<: *kafka
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:9093,EXTERNAL://:9096
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:29092,EXTERNAL://localhost:9096
+    ports:
+      - "9096:9096"
+
+  # ------------------------------------------------------------------ Kafka Connect (Debezium)
+  # Faz 0'da connector yok; servis başına outbox connector'ları Faz 2'de infra/debezium/ altına gelir.
+
+  kafka-connect:
+    image: quay.io/debezium/connect:3.6.3.Final
+    profiles: [core]
+    restart: unless-stopped
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+      postgres-primary:
+        condition: service_healthy
+    environment:
+      BOOTSTRAP_SERVERS: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      GROUP_ID: orderflow-connect
+      CONFIG_STORAGE_TOPIC: _connect_configs
+      OFFSET_STORAGE_TOPIC: _connect_offsets
+      STATUS_STORAGE_TOPIC: _connect_status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      HEAP_OPTS: -Xms768m -Xmx768m
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8083/ > /dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ------------------------------------------------------------------ Redis
+
+  redis:
+    image: redis:8.10
+    profiles: [core]
+    restart: unless-stopped
+    # Kalıcılık kapalı: Redis kritik yolun parçası değil (02 §5), yeniden başlayınca boş açılır.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ------------------------------------------------------------------ tools
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
+    profiles: [tools]
+    restart: unless-stopped
+    environment:
+      KAFKA_CLUSTERS_0_NAME: orderflow
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: debezium
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      JAVA_OPTS: -Xmx256m
+    ports:
+      - "8090:8080"
+
+volumes:
+  postgres-primary-data:
+  postgres-replica-data:

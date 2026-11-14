@@ -9,7 +9,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @SpringBootTest
 public abstract class SharedPersistenceTestContainerConfiguration {
 
-    private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18-alpine");
+    private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18.7");
 
     static {
         POSTGRES.start();
