@@ -5,15 +5,6 @@ import io.micrometer.tracing.Tracer;
 
 import java.util.Optional;
 
-/**
- * O anki trace'in kimliğini verir (08-loglama-kararlari §5).
- *
- * <p>Tracing kapalıysa ya da o an bir span yoksa boş döner. {@link Tracer#NOOP} boş bir trace id
- * ({@code ""}) verdiği için boş değerler de "yok" sayılır.
- *
- * <p>Kullananlar: {@code ErrorResponse.traceId} (shared-web); ileride {@code CorrelationIdFilter},
- * {@code EventBuilder} ve outbox'ın {@code traceparent} kolonu.
- */
 public class TraceContextProvider {
 
     private final Tracer tracer;
