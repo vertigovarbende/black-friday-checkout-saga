@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.deveyk.orderflow</groupId>
+        <artifactId>orderflow-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>e2e-tests</artifactId>
+    <description>Servisler arası E2E ve chaos testleri. Ayakta olan compose ortamına HTTP ile istek atar; varsayılan olarak koşmaz (-Pe2e, -Pchaos).</description>
+
+    <properties>
+        <!-- Varsayılan build'de E2E koşmaz; compose ayakta iken -Pe2e ya da -Pchaos ile açılır -->
+        <skipITs>true</skipITs>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>e2e</id>
+            <properties>
+                <skipITs>false</skipITs>
+            </properties>
+        </profile>
+        <profile>
+            <id>chaos</id>
+            <properties>
+                <skipITs>false</skipITs>
+            </properties>
+        </profile>
+    </profiles>
+</project>

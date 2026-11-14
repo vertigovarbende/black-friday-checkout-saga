@@ -1,0 +1,10 @@
+# WSL2 (ve Docker Desktop'ın WSL2 backend'i) için kaynak sınırları.
+# Kopyalanacağı yer: %UserProfile%\.wslconfig   Sonra: wsl --shutdown   Ayrıntı: docs/setup/local-development.md
+#
+# 16 GB'lık makinede Windows, IntelliJ ve servisler için yaklaşık 8 GB kalır.
+# Compose core profili ~3,5 GB, observability profili (Faz 2) ~1,5-2 GB kullanır.
+
+[wsl2]
+memory=8GB
+processors=4
+swap=4GB

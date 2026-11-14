@@ -62,7 +62,15 @@ Ayrıntı: [`docs/decisions/01-paket-yapisi-kararlari.md`](docs/decisions/01-pak
 
 ## Çalıştırma
 
-Henüz kod yok. Compose dosyaları ve ilk çalıştırma adımları Faz 0'da eklenecek
+```bash
+# altyapı: Postgres (primary + replica), Kafka (3 node, KRaft), Kafka Connect (Debezium), Redis
+docker compose -f infra/docker/compose.yml --profile core up -d
+
+# build ve testler (integration testleri için Docker açık olmalı)
+mvn verify
+```
+
+Kurulum (WSL bellek sınırı, portlar, kontroller, sık görülen sorunlar): [`docs/setup/local-development.md`](docs/setup/local-development.md).
 
 Hedef makine: 4 çekirdek, 16 GB RAM, Windows + WSL2. Compose profilleri bu sınıra göre ayrıldı.
 
