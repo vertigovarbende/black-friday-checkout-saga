@@ -11,6 +11,9 @@ spring:
       properties:
         # Olmayan bir topic'in metadata'sı için varsayılan 60 sn yerine 5 sn bekle (deney 1)
         max.block.ms: 5000
+        # Bir gönderim retry'larla birlikte en fazla 10 sn sürsün; varsayılan 2 dk (deney 2)
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
     consumer:
       group-id: kafka-basics
       auto-offset-reset: earliest
