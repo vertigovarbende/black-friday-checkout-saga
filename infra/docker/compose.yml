@@ -168,7 +168,7 @@ services:
     image: redis:8.10
     profiles: [core]
     restart: unless-stopped
-    # Kalıcılık kapalı: Redis kritik yolun parçası değil (02 §5), yeniden başlayınca boş açılır.
+    # Kalıcılık kapalı: Redis kritik yolun parçası değil (02 §6), yeniden başlayınca boş açılır.
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     ports:
       - "6379:6379"
