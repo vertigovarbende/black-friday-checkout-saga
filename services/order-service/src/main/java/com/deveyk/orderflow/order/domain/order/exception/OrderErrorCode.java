@@ -114,6 +114,11 @@ public enum OrderErrorCode implements ErrorCode {
             "ORD_021",
             "QUANTITY_MUST_BE_POSITIVE",
             "Quantity must be at least 1"
+    ),
+    PRODUCT_NAME_TOO_LONG(
+            "ORD_022",
+            "PRODUCT_NAME_TOO_LONG",
+            "Product name can be at most {0} characters"
     );
 
     private final String code;

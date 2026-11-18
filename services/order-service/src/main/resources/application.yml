@@ -1,6 +1,26 @@
 spring:
   application:
     name: order-service
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
 
 server:
   port: 8081
+
+orderflow:
+  datasource:
+    primary:
+      jdbc-url: jdbc:postgresql://localhost:5432/order_service
+      username: order_service
+      password: order_service
+      pool-name: order-primary
+      maximum-pool-size: 10
+    replica:
+      jdbc-url: jdbc:postgresql://localhost:5433/order_service
+      username: order_service
+      password: order_service
+      pool-name: order-replica
+      maximum-pool-size: 10
+      read-only: true

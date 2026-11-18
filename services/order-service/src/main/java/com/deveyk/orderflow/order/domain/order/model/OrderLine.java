@@ -11,6 +11,8 @@ import lombok.Getter;
 @Getter
 public class OrderLine extends Entity<OrderLineId> {
 
+    public static final int MAX_PRODUCT_NAME_LENGTH = 200;
+
     private final OrderLineId id;
     private final ProductId productId;
     private final String productName;
@@ -36,6 +38,11 @@ public class OrderLine extends Entity<OrderLineId> {
 
         if (productName == null || productName.isBlank()) {
             throw new DomainValidationException(OrderErrorCode.PRODUCT_NAME_REQUIRED);
+        }
+
+        if (productName.length() > MAX_PRODUCT_NAME_LENGTH) {
+            throw new DomainValidationException(OrderErrorCode.PRODUCT_NAME_TOO_LONG,
+                    String.valueOf(MAX_PRODUCT_NAME_LENGTH));
         }
 
         if (unitPrice == null) {
