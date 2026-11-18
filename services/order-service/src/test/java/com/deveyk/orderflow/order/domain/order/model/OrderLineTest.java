@@ -54,6 +54,20 @@ class OrderLineTest {
     }
 
     @Test
+    @DisplayName("Ürün adı MAX_PRODUCT_NAME_LENGTH karakterden uzun olamaz")
+    void givenTooLongProductName_whenCreate_thenRejected() {
+        // Given
+        final String name = "x".repeat(OrderLine.MAX_PRODUCT_NAME_LENGTH + 1);
+
+        // When / Then
+        assertThatThrownBy(() -> OrderLine.create(
+                new ProductId(OrderValidTestData.Product.ID), name,
+                new Money(BigDecimal.TEN, TRY), new Quantity(1)))
+                .isInstanceOfSatisfying(DomainValidationException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.PRODUCT_NAME_TOO_LONG));
+    }
+
+    @Test
     @DisplayName("Birim fiyatı sıfır olan satır oluşturulamaz")
     void givenZeroUnitPrice_whenCreate_thenRejected() {
         // When / Then
