@@ -38,6 +38,7 @@
         <module>services/notification-service</module>
         <module>services/feed-service</module>
         <module>e2e-tests</module>
+        <module>experiments/kafka-basics</module>
     </modules>
 
     <properties>
