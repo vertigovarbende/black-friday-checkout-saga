@@ -2,17 +2,21 @@ package com.deveyk.orderflow.order.testsupport;
 
 import com.deveyk.orderflow.shared.testsupport.LogTrackerConfiguration;
 import com.deveyk.orderflow.shared.testsupport.container.OrderflowContainers;
+import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.List;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Import(OrderDatabaseCleaner.class)
 public abstract class OrderTestContainerConfiguration extends LogTrackerConfiguration {
 
@@ -36,8 +40,14 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
     @Autowired
     private OrderDatabaseCleaner databaseCleaner;
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    protected OrderflowMockMvc orderflowMockMvc;
+
     @BeforeEach
     void cleanDatabase() {
         databaseCleaner.clean();
+        orderflowMockMvc = new OrderflowMockMvc(mockMvc);
     }
 }
