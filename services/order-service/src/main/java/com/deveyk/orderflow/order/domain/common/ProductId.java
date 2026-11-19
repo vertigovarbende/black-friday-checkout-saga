@@ -1,4 +1,4 @@
-package com.deveyk.orderflow.order.domain.order.model;
+package com.deveyk.orderflow.order.domain.common;
 
 import com.deveyk.orderflow.shared.domain.exception.DomainValidationException;
 import com.deveyk.orderflow.shared.domain.exception.SharedErrorCode;

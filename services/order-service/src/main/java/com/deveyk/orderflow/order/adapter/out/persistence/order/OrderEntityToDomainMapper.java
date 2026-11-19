@@ -1,13 +1,13 @@
 package com.deveyk.orderflow.order.adapter.out.persistence.order;
 
 import com.deveyk.orderflow.order.domain.common.Money;
+import com.deveyk.orderflow.order.domain.common.ProductId;
 import com.deveyk.orderflow.order.domain.common.Quantity;
 import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.order.domain.order.model.OrderLineId;
-import com.deveyk.orderflow.order.domain.order.model.ProductId;
 
 import java.util.Currency;
 

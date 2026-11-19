@@ -1,6 +1,9 @@
 spring:
   application:
     name: order-service
+  flyway:
+    # db/seed: lokal çalıştırma için ürün kopyaları. Testler bunun yerine db/testdata'yı kullanır.
+    locations: classpath:db/migration,classpath:db/seed
   jpa:
     open-in-view: false
     hibernate:

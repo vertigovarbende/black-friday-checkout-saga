@@ -30,6 +30,7 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
             registry.add("orderflow.datasource." + pool + ".username", POSTGRES::getUsername);
             registry.add("orderflow.datasource." + pool + ".password", POSTGRES::getPassword);
         }
+        registry.add("spring.flyway.locations", () -> "classpath:db/migration,classpath:db/testdata");
     }
 
     @Autowired
