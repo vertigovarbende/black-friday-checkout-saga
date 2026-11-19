@@ -5,6 +5,7 @@ import com.deveyk.orderflow.shared.testsupport.container.OrderflowContainers;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTracing
 @Import(OrderDatabaseCleaner.class)
 public abstract class OrderTestContainerConfiguration extends LogTrackerConfiguration {
 
@@ -35,6 +37,7 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
             registry.add("orderflow.datasource." + pool + ".password", POSTGRES::getPassword);
         }
         registry.add("spring.flyway.locations", () -> "classpath:db/migration,classpath:db/testdata");
+        registry.add("management.tracing.export.otlp.enabled", () -> "false");
     }
 
     @Autowired

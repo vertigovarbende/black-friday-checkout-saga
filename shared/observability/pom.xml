@@ -12,9 +12,13 @@
     </parent>
 
     <artifactId>shared-observability</artifactId>
-    <description>Gözlem altyapısı (Spring Boot starter). Şimdilik sadece TraceContextProvider; CorrelationIdFilter, UseCaseObservationAspect, MdcKeys ve OrderflowHeaders Faz 2'de gelir.</description>
+    <description>Gözlem altyapısı (Spring Boot starter): TraceContextProvider, CorrelationIdFilter, UseCaseObservationAspect, MdcKeys, OrderflowHeaders, ErrorFamily (08-loglama-kararlari).</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-domain</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
@@ -23,11 +27,45 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-observation</artifactId>
+        </dependency>
+        <!-- UseCaseObservationAspect: Spring AOP + AspectJ annotation'ları (Boot 4'te spring-boot-starter-aop'un yeni adı) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+        <!-- CorrelationIdFilter: OncePerRequestFilter ve MDC -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
 
         <!-- test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-observation-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- UseCaseObservationAspectTest: UseCaseHandler'ı uygulayan bir test handler'ı -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-application</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

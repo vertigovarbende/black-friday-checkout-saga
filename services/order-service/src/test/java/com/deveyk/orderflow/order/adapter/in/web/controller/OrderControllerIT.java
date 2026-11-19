@@ -16,6 +16,7 @@ import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderRequestBuilder;
+import com.deveyk.orderflow.shared.observability.OrderflowHeaders;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvcRequestBuilders;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockResultMatchersBuilders;
 import com.jayway.jsonpath.JsonPath;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +33,7 @@ import java.util.UUID;
 import static com.deveyk.orderflow.order.testsupport.OrderValidTestData.TRY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.matchesPattern;
 
 class OrderControllerIT extends OrderTestContainerConfiguration {
 
@@ -132,6 +135,43 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
 
         // When / Then
         orderflowMockMvc.perform(OrderflowMockMvcRequestBuilders.get(BASE_PATH + "/" + order.getId().value(), USER_ID), OrderErrorCode.ORDER_NOT_FOUND)
-                .andExpect(OrderflowMockResultMatchersBuilders.status().isNotFound());
+                .andExpect(OrderflowMockResultMatchersBuilders.status().isNotFound())
+                .andExpect(OrderflowMockResultMatchersBuilders.response("traceId").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Verilen X-Correlation-Id cevapta aynen döner; X-Trace-Id isteğin trace'ini gösterir")
+    void givenCorrelationIdHeader_whenPlaceOrder_thenCorrelationIdEchoedAndTraceIdReturned() throws Exception {
+        // Given
+        final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
+                .withValidValues()
+                .build();
+
+        // When / Then
+        orderflowMockMvc.perform(OrderflowMockMvcRequestBuilders.post(BASE_PATH, USER_ID, request)
+                        .header(OrderflowHeaders.CORRELATION_ID, "black-friday-checkout-1"))
+                .andExpect(OrderflowMockResultMatchersBuilders.status().isAccepted())
+                .andExpect(MockMvcResultMatchers.header().string(OrderflowHeaders.CORRELATION_ID, "black-friday-checkout-1"))
+                .andExpect(MockMvcResultMatchers.header().string(OrderflowHeaders.TRACE_ID, matchesPattern("[0-9a-f]{32}")));
+    }
+
+    @Test
+    @DisplayName("X-Correlation-Id verilmezse correlationId isteğin traceId'sidir")
+    void givenNoCorrelationIdHeader_whenPlaceOrder_thenCorrelationIdIsTraceId() throws Exception {
+        // Given
+        final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
+                .withValidValues()
+                .build();
+
+        // When
+        final MvcResult result = orderflowMockMvc
+                .perform(OrderflowMockMvcRequestBuilders.post(BASE_PATH, USER_ID, request))
+                .andExpect(OrderflowMockResultMatchersBuilders.status().isAccepted())
+                .andReturn();
+
+        // Then
+        assertThat(result.getResponse().getHeader(OrderflowHeaders.TRACE_ID)).isNotBlank();
+        assertThat(result.getResponse().getHeader(OrderflowHeaders.CORRELATION_ID))
+                .isEqualTo(result.getResponse().getHeader(OrderflowHeaders.TRACE_ID));
     }
 }
