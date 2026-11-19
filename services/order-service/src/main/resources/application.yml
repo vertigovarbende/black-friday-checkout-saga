@@ -27,3 +27,32 @@ orderflow:
       pool-name: order-replica
       maximum-pool-size: 10
       read-only: true
+
+# Gözlem (08 §3, §4). JSON log compose profilinde açılır (application-compose.yml, adım 5b).
+logging:
+  level:
+    root: INFO
+    com.deveyk.orderflow: INFO
+  structured:
+    json:
+      add:
+        service: ${spring.application.name}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+  # Metriklerin tek yolu Prometheus'un scrape ettiği /actuator/prometheus; starter'ın OTLP metrik export'u kapalı.
+  otlp:
+    metrics:
+      export:
+        enabled: false
