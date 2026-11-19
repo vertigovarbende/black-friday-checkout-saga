@@ -119,6 +119,11 @@ public enum OrderErrorCode implements ErrorCode {
             "ORD_022",
             "PRODUCT_NAME_TOO_LONG",
             "Product name can be at most {0} characters"
+    ),
+    PRODUCT_NOT_AVAILABLE(
+            "ORD_023",
+            "PRODUCT_NOT_AVAILABLE",
+            "Products are not available for ordering: {0}"
     );
 
     private final String code;

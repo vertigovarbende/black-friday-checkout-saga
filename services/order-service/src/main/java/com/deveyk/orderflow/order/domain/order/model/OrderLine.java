@@ -1,6 +1,7 @@
 package com.deveyk.orderflow.order.domain.order.model;
 
 import com.deveyk.orderflow.order.domain.common.Money;
+import com.deveyk.orderflow.order.domain.common.ProductId;
 import com.deveyk.orderflow.order.domain.common.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.shared.domain.Entity;

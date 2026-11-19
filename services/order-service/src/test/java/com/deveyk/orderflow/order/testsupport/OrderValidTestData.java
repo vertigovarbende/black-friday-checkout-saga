@@ -31,4 +31,14 @@ public final class OrderValidTestData {
         private Product() {
         }
     }
+
+    public static final class SecondProduct {
+
+        public static final UUID ID = UUID.fromString("0198a1b2-0000-7000-8000-000000000102");
+        public static final String NAME = "USB-C Cable";
+        public static final BigDecimal UNIT_PRICE = new BigDecimal("15.00");
+
+        private SecondProduct() {
+        }
+    }
 }
