@@ -19,11 +19,24 @@
             <groupId>com.deveyk.orderflow</groupId>
             <artifactId>shared-domain</artifactId>
         </dependency>
+        <!-- web/*: GlobalExceptionHandler (SharedWebAutoConfiguration) ve OrderflowHeaders -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-observability</artifactId>
+        </dependency>
         <!-- Kod src/main'de olduğu için compile scope; servisler bu modülü zaten test scope'uyla ekler.
              JUnit, Mockito, AssertJ ve Logback (spring-boot-starter-logging üzerinden) buradan gelir. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>

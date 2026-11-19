@@ -10,6 +10,7 @@ import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.shared.application.UseCaseHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PlaceOrderUseCaseHandler implements UseCaseHandler<Order, PlaceOrderUseCase> {
@@ -54,6 +56,8 @@ public class PlaceOrderUseCaseHandler implements UseCaseHandler<Order, PlaceOrde
 
         final Order order = Order.place(useCase.customerId(), lines, clock.instant());
         orderSavePort.create(order);
+
+        log.info("Order placed orderId={} customerId={} lines={}", order.getId().value(), order.getCustomerId().value(), order.getLines().size());
         return order;
     }
 
