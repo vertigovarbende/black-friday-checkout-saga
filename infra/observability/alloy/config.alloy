@@ -1,0 +1,48 @@
+// Docker container loglarını okuyup Loki'ye gönderir (08 §1).
+// Sadece "orderflow.logs=true" label'ı taşıyan container'lar okunur: uygulama servisleri.
+// Altyapının (Kafka, Connect …) logları toplanmaz; çok gürültülüler ve Loki'yi büyütürler.
+
+discovery.docker "apps" {
+  host = "unix:///var/run/docker.sock"
+
+  filter {
+    name   = "label"
+    values = ["orderflow.logs=true"]
+  }
+}
+
+// Loki etiketi olarak sadece düşük kardinaliteli alanlar: service (compose servis adı) ve level.
+discovery.relabel "apps" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "apps" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.apps.targets
+  relabel_rules = discovery.relabel.apps.rules
+  forward_to    = [loki.process.json.receiver]
+}
+
+// Satır JSON'sa (compose profili, logstash formatı) level'ı etikete çıkarır; JSON değilse satır olduğu gibi geçer.
+loki.process "json" {
+  stage.json {
+    expressions = { level = "level" }
+  }
+
+  stage.labels {
+    values = { level = "" }
+  }
+
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
