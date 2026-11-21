@@ -16,7 +16,10 @@ import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderRequestBuilder;
+import com.deveyk.orderflow.shared.messaging.EventTypeNames;
+import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.observability.OrderflowHeaders;
+import com.deveyk.orderflow.shared.testsupport.messaging.OutboxAssert;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvcRequestBuilders;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockResultMatchersBuilders;
 import com.jayway.jsonpath.JsonPath;
@@ -81,6 +84,8 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
                         tuple(new ProductId(OrderValidTestData.Product.ID), OrderValidTestData.Product.NAME, new Money(OrderValidTestData.Product.UNIT_PRICE, TRY), new Quantity(2)),
                         tuple(new ProductId(OrderValidTestData.SecondProduct.ID), OrderValidTestData.SecondProduct.NAME, new Money(OrderValidTestData.SecondProduct.UNIT_PRICE, TRY), new Quantity(1))
                 );
+        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId.toString(), EventTypeNames.ORDER_CREATED);
+        assertThat(event.topic()).isEqualTo(TopicNames.ORDER_CREATED);
     }
 
     @Test
@@ -99,6 +104,7 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
 
         // Verify
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM orders", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM outbox_event", Integer.class)).isZero();
     }
 
     @Test
@@ -153,6 +159,30 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
                 .andExpect(OrderflowMockResultMatchersBuilders.status().isAccepted())
                 .andExpect(MockMvcResultMatchers.header().string(OrderflowHeaders.CORRELATION_ID, "black-friday-checkout-1"))
                 .andExpect(MockMvcResultMatchers.header().string(OrderflowHeaders.TRACE_ID, matchesPattern("[0-9a-f]{32}")));
+    }
+
+    @Test
+    @DisplayName("Verilen X-Correlation-Id ve isteğin trace'i order.created zarfına ve outbox satırına taşınır")
+    void givenCorrelationIdHeader_whenPlaceOrder_thenOrderCreatedCarriesCorrelationAndTrace() throws Exception {
+        // Given
+        final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
+                .withValidValues()
+                .build();
+
+        // When
+        final MvcResult result = orderflowMockMvc
+                .perform(OrderflowMockMvcRequestBuilders.post(BASE_PATH, USER_ID, request)
+                        .header(OrderflowHeaders.CORRELATION_ID, "black-friday-checkout-1"))
+                .andExpect(OrderflowMockResultMatchersBuilders.status().isAccepted())
+                .andReturn();
+
+        // Then
+        final String orderId = JsonPath.read(result.getResponse().getContentAsString(), "$.orderId");
+        final String traceId = result.getResponse().getHeader(OrderflowHeaders.TRACE_ID);
+        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventTypeNames.ORDER_CREATED);
+        assertThat(JsonPath.<String>read(event.payload(), "$.metadata.correlationId")).isEqualTo("black-friday-checkout-1");
+        assertThat(JsonPath.<String>read(event.payload(), "$.metadata.traceId")).isEqualTo(traceId);
+        assertThat(event.traceparent()).startsWith("00-" + traceId + "-");
     }
 
     @Test

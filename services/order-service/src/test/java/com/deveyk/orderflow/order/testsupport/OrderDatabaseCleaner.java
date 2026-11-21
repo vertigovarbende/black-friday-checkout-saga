@@ -11,6 +11,6 @@ public class OrderDatabaseCleaner {
     }
 
     public void clean() {
-        jdbcTemplate.execute("TRUNCATE TABLE order_lines, orders CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE order_lines, orders, outbox_event CASCADE");
     }
 }

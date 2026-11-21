@@ -36,6 +36,14 @@
             <artifactId>shared-observability</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-outbox</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>

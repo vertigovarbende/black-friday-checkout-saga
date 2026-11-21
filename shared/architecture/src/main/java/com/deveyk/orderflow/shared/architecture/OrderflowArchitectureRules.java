@@ -126,11 +126,14 @@ public final class OrderflowArchitectureRules {
                 .because("handler'lar UseCaseHandler'ı uygular ve application.<aggregate>.handler altında durur (kural 5)")
                 .allowEmptyShould(true);
 
+        // Sadece servisler: shared modüllerin kendi port'u olabilir (shared-outbox: OutboxEventPort). Onları
+        // servisin application'ı değil adapter'ları kullanır; kural 2 application'ı shared modüllerden zaten ayırır.
         @ArchTest
         public static final ArchRule PORTS_RESIDE_IN_APPLICATION_PORT_PACKAGE = classes()
                 .that().haveSimpleNameEndingWith("Port").and().areInterfaces()
+                .and().resideOutsideOfPackage(SHARED)
                 .should().resideInAPackage("..application..port..")
-                .because("port arayüzleri application.<aggregate>.port altında durur (kural 5)")
+                .because("servislerin port arayüzleri application.<aggregate>.port altında durur (kural 5)")
                 .allowEmptyShould(true);
 
         // 6. Döngü yok. Dilim = katman + bir alt package: domain.<aggregate>, application.<aggregate>,

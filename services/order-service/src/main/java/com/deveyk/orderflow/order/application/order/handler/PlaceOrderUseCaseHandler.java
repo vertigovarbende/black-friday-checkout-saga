@@ -1,5 +1,6 @@
 package com.deveyk.orderflow.order.application.order.handler;
 
+import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.application.order.port.OrderSavePort;
 import com.deveyk.orderflow.order.application.order.usecase.PlaceOrderUseCase;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
@@ -29,6 +30,7 @@ public class PlaceOrderUseCaseHandler implements UseCaseHandler<Order, PlaceOrde
 
     private final ProductSnapshotReadPort productSnapshotReadPort;
     private final OrderSavePort orderSavePort;
+    private final OrderDomainEventPort orderDomainEventPort;
     private final Clock clock;
 
     @Override
@@ -56,6 +58,7 @@ public class PlaceOrderUseCaseHandler implements UseCaseHandler<Order, PlaceOrde
 
         final Order order = Order.place(useCase.customerId(), lines, clock.instant());
         orderSavePort.create(order);
+        orderDomainEventPort.publishOrderCreated(order);
 
         log.info("Order placed orderId={} customerId={} lines={}", order.getId().value(), order.getCustomerId().value(), order.getLines().size());
         return order;

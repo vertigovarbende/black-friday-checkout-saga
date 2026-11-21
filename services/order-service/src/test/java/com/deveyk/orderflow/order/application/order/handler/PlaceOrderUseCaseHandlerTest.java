@@ -1,5 +1,6 @@
 package com.deveyk.orderflow.order.application.order.handler;
 
+import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.application.order.usecase.PlaceOrderUseCase;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
 import com.deveyk.orderflow.order.domain.common.Money;
@@ -52,13 +53,15 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
 
     @Mock
     private ProductSnapshotReadPort productSnapshotReadPort;
+    @Mock
+    private OrderDomainEventPort orderDomainEventPort;
     private final InMemoryOrderAdapter orderAdapter = new InMemoryOrderAdapter();
     private final MutableClock clock = MutableClock.at(NOW);
     private PlaceOrderUseCaseHandler handler;
 
     @BeforeEach
     void setUpHandler() {
-        handler = new PlaceOrderUseCaseHandler(productSnapshotReadPort, orderAdapter, clock);
+        handler = new PlaceOrderUseCaseHandler(productSnapshotReadPort, orderAdapter, orderDomainEventPort, clock);
     }
 
     @Test
@@ -91,6 +94,7 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
         // Verify
         Mockito.verify(productSnapshotReadPort, Mockito.times(1))
                 .findAllByIds(Set.of(HEADPHONES.getId(), CABLE.getId()));
+        Mockito.verify(orderDomainEventPort, Mockito.times(1)).publishOrderCreated(placed);
     }
 
     @Test
@@ -113,6 +117,9 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
                             .doesNotContain(HEADPHONES.getId().value().toString());
                 });
         assertThat(orderAdapter.storedCount()).isZero();
+
+        // Verify
+        Mockito.verifyNoInteractions(orderDomainEventPort);
     }
 
     @Test

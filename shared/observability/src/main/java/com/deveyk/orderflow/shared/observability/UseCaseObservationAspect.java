@@ -25,7 +25,9 @@ public class UseCaseObservationAspect {
 
     @Around("execution(* com.deveyk.orderflow.shared.application.UseCaseHandler+.handle(..))")
     public Object observe(final ProceedingJoinPoint joinPoint) throws Throwable {
+
         final String useCase = useCaseName(joinPoint);
+
         final Observation observation = Observation.createNotStarted(OBSERVATION_NAME, observationRegistry)
                 .contextualName(useCase)
                 .lowCardinalityKeyValue(USECASE_KEY, useCase)

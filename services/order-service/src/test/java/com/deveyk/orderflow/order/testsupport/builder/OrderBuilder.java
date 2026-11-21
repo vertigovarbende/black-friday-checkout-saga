@@ -35,6 +35,11 @@ public class OrderBuilder implements TestDataBuilder<Order> {
         return this;
     }
 
+    public OrderBuilder withId(final OrderId id) {
+        this.id = id;
+        return this;
+    }
+
     public OrderBuilder withCustomerId(final CustomerId customerId) {
         this.customerId = customerId;
         return this;
