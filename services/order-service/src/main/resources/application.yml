@@ -8,6 +8,8 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
 
 server:
   port: 8081
@@ -27,11 +29,18 @@ orderflow:
       pool-name: order-replica
       maximum-pool-size: 10
       read-only: true
+  # order-service'in açtığı topic'ler (order.created). Compose'da 3 broker; testlerde tek broker olduğu için RF ve min ISR 1.
+  kafka:
+    topics:
+      partitions: 3
+      replication-factor: 3
+      min-insync-replicas: 2
 
 logging:
   level:
     root: INFO
     com.deveyk.orderflow: INFO
+    org.apache.kafka: WARN
   structured:
     json:
       add:

@@ -270,6 +270,13 @@ services:
         condition: service_healthy
       postgres-replica:
         condition: service_healthy
+      # order.created topic'ini açılışta servis açar; Debezium'dan önce var olmalı (otomatik oluşturma kapalı).
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: compose
     # MaxRAMPercentage (Dockerfile) bu sınıra göre heap ayırır.

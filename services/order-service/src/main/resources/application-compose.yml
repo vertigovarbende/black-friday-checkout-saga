@@ -1,3 +1,7 @@
+spring:
+  kafka:
+    bootstrap-servers: kafka-1:29092,kafka-2:29092,kafka-3:29092
+
 orderflow:
   datasource:
     primary:
