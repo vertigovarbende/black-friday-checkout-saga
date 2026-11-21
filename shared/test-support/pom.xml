@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>shared-test-support</artifactId>
-    <description>Test taban sınıfları, TestDataBuilder, MutableClock, ErrorCodeAssert. Servisler test scope'uyla ekler.</description>
+    <description>Test taban sınıfları, TestDataBuilder, container'lar, mesajlaşma araçları, golden JSON sözleşmeleri. Servisler test scope'uyla ekler.</description>
 
     <dependencies>
         <dependency>
@@ -41,6 +41,25 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-postgresql</artifactId>
+        </dependency>
+        <!-- container/OrderflowContainers.kafka(), messaging/MessageProbe -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+        <!-- MessageProbe ve connector kaydında asenkron bekleme (07 §8.3) -->
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        <!-- container/DebeziumConnectors: connector JSON'unu okuyup Connect'e gönderir -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <!-- messaging/OutboxAssert: outbox tablosunu JdbcTemplate ile okur -->
         <dependency>
