@@ -12,5 +12,43 @@
     </parent>
 
     <artifactId>shared-messaging</artifactId>
-    <description>Event zarfı (DomainEvent, DomainEventMetadata), EventBuilder, payload kontratları, isim sabitleri ve ortak Kafka ayarları.</description>
+    <description>Event zarfı (OrderflowEvent, EventMetadata), EventBuilder, payload kontratları, isim sabitleri ve ortak Kafka ayarları.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-domain</artifactId>
+        </dependency>
+        <!-- EventBuilder: traceId ve correlationId (08 §5.2) -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-observability</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!-- payload kontratlarında @Builder (05 §5.1) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-architecture</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

@@ -37,6 +37,7 @@ public record PlaceOrderUseCase(CustomerId customerId, List<Line> lines) impleme
             if (quantity == null) {
                 throw new DomainValidationException(OrderErrorCode.QUANTITY_REQUIRED);
             }
+
         }
     }
 }

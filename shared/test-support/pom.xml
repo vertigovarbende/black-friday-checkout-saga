@@ -42,6 +42,11 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-postgresql</artifactId>
         </dependency>
+        <!-- messaging/OutboxAssert: outbox tablosunu JdbcTemplate ile okur -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
 
         <!-- test -->
         <dependency>

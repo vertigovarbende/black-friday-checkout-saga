@@ -2,6 +2,7 @@ package com.deveyk.orderflow.shared.observability;
 
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -15,8 +16,10 @@ public class ObservabilityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TraceContextProvider traceContextProvider(final ObjectProvider<Tracer> tracer) {
-        return new TraceContextProvider(tracer.getIfAvailable(() -> Tracer.NOOP));
+    public TraceContextProvider traceContextProvider(final ObjectProvider<Tracer> tracer,
+                                                     final ObjectProvider<Propagator> propagator) {
+
+        return new TraceContextProvider(tracer.getIfAvailable(() -> Tracer.NOOP), propagator.getIfAvailable(() -> Propagator.NOOP));
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -28,6 +31,7 @@ public class ObservabilityAutoConfiguration {
         CorrelationIdFilter correlationIdFilter(final TraceContextProvider traceContextProvider) {
             return new CorrelationIdFilter(traceContextProvider);
         }
+
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -39,5 +43,6 @@ public class ObservabilityAutoConfiguration {
         UseCaseObservationAspect useCaseObservationAspect(final ObjectProvider<ObservationRegistry> observationRegistry) {
             return new UseCaseObservationAspect(observationRegistry.getIfAvailable(() -> ObservationRegistry.NOOP));
         }
+
     }
 }
