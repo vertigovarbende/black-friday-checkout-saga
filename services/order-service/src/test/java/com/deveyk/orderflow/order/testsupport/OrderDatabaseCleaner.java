@@ -11,6 +11,8 @@ public class OrderDatabaseCleaner {
     }
 
     public void clean() {
-        jdbcTemplate.execute("TRUNCATE TABLE order_lines, orders, outbox_event CASCADE");
+        // product_snapshots temizlenmez: seed satırları R__ migration'ından gelir ve testler onları değiştirmez;
+        // listener testleri her seferinde yeni bir productId kullanır.
+        jdbcTemplate.execute("TRUNCATE TABLE order_lines, orders, outbox_event, inbox_event CASCADE");
     }
 }

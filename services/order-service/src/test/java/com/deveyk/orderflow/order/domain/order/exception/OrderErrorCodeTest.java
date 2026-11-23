@@ -1,5 +1,6 @@
 package com.deveyk.orderflow.order.domain.order.exception;
 
+import com.deveyk.orderflow.order.adapter.in.messaging.MessagingErrorCode;
 import com.deveyk.orderflow.order.domain.common.CommonDomainErrorCode;
 import com.deveyk.orderflow.order.domain.product.exception.ProductSnapshotErrorCode;
 import com.deveyk.orderflow.shared.domain.exception.ErrorCode;
@@ -27,10 +28,17 @@ class OrderErrorCodeTest {
     }
 
     @Test
+    @DisplayName("MessagingErrorCode kodları ORD öneki, tekil kod ve geçerli mesaj kurallarına uyar")
+    void givenMessagingErrorCodes_whenAssertValid_thenNoViolations() {
+        ErrorCodeAssert.assertValid(MessagingErrorCode.class, "ORD");
+    }
+
+    @Test
     @DisplayName("Servisteki bütün error code enum'ları arasında kodlar tekildir")
     void givenAllOrderServiceErrorCodes_whenCollectCodes_thenNoDuplicates() {
         // When
-        final Stream<ErrorCode> all = Stream.<ErrorCode[]>of(OrderErrorCode.values(), CommonDomainErrorCode.values(), ProductSnapshotErrorCode.values())
+        final Stream<ErrorCode> all = Stream.<ErrorCode[]>of(OrderErrorCode.values(), CommonDomainErrorCode.values(), ProductSnapshotErrorCode.values(),
+                        MessagingErrorCode.values())
                 .flatMap(Arrays::stream);
 
         // Then

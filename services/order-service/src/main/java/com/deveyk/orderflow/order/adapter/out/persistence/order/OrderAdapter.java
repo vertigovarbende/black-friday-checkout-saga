@@ -33,13 +33,15 @@ class OrderAdapter implements OrderReadPort, OrderSavePort {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void update(final Order order) {
+
         final OrderEntity entity = orderRepository.findById(order.getId().value())
                 .orElseThrow(() -> new OrderNotFoundException(order.getId()));
 
         if (entity.getVersion() != order.getVersion()) {
-            throw new OptimisticLockingFailureException("Order " + order.getId().value()
-                    + " was modified concurrently: read version " + order.getVersion()
-                    + ", current version " + entity.getVersion());
+
+            String msg = "Order " + order.getId().value() + " was modified concurrently: read version " + order.getVersion() + ", current version " + entity.getVersion();
+            throw new OptimisticLockingFailureException(msg);
+
         }
 
         entity.applyState(order.getStatus(), order.getCancellationReason().orElse(null), order.getLastModifiedAt());
