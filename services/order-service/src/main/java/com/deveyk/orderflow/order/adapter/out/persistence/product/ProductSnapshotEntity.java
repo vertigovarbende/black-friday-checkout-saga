@@ -6,13 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-// Şimdilik sadece okunur (satırlar seed'den gelir). Yazma yolu product.changed ile adım 7'de eklenir.
+// Satırlar seed'den ve product.changed'den gelir.
 @Getter
 @Entity
 @Table(name = "product_snapshots")
@@ -30,4 +31,27 @@ class ProductSnapshotEntity extends BaseEntity {
 
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
+
+    @Column(name = "product_version", nullable = false)
+    private long productVersion;
+
+    @Builder
+    private ProductSnapshotEntity(final UUID id,
+                                  final String name,
+                                  final BigDecimal unitPrice,
+                                  final String currency,
+                                  final long productVersion) {
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.currency = currency;
+        this.productVersion = productVersion;
+    }
+
+    void applyState(final String name, final BigDecimal unitPrice, final String currency, final long productVersion) {
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.currency = currency;
+        this.productVersion = productVersion;
+    }
 }

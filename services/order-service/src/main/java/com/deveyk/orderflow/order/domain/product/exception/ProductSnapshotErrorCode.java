@@ -34,6 +34,11 @@ public enum ProductSnapshotErrorCode implements ErrorCode {
             "ORD_205",
             "UNIT_PRICE_MUST_BE_POSITIVE",
             "Unit price must be greater than zero"
+    ),
+    PRODUCT_VERSION_NEGATIVE(
+            "ORD_206",
+            "PRODUCT_VERSION_NEGATIVE",
+            "Product version cannot be negative: {0}"
     );
 
     private final String code;

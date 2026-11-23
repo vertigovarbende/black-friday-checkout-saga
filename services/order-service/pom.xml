@@ -44,10 +44,14 @@
             <artifactId>shared-outbox</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-inbox</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
-        <!-- Sadece topic oluşturmak için (KafkaAdmin + NewTopic). Event'leri Kafka'ya Debezium taşır (ADR-0005). -->
+        <!-- Topic'ler (KafkaAdmin + NewTopic), listener'lar ve DLT. Event'leri Kafka'ya Debezium taşır (ADR-0005). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-kafka</artifactId>

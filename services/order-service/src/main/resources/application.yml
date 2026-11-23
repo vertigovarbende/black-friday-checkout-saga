@@ -10,6 +10,27 @@ spring:
       ddl-auto: validate
   kafka:
     bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
+    # Servis başına tek consumer group; KIP-848 protokolü (ADR-0018). Değerler String olarak okunur,
+    # JSON'u listener çözer (EventJsonReader). ErrorHandlingDeserializer: çözülemeyen kayıt poll()'da patlamasın (deney 5.5).
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        group.protocol: consumer
+    # Sadece DLT'ye yazmak için. Çözülemeyen kayıt DLT'ye orijinal byte'larıyla gider; String ya da byte[] yazabilmeli.
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.StringOrBytesSerializer
+      value-serializer: org.springframework.kafka.support.serializer.StringOrBytesSerializer
+    # concurrency = partition sayısı: bloklayan retry sadece kendi partition'ını bekletir (deney 5.2).
+    listener:
+      concurrency: 3
+      observation-enabled: true
+    template:
+      observation-enabled: true
 
 server:
   port: 8081
@@ -29,7 +50,8 @@ orderflow:
       pool-name: order-replica
       maximum-pool-size: 10
       read-only: true
-  # order-service'in açtığı topic'ler (order.created). Compose'da 3 broker; testlerde tek broker olduğu için RF ve min ISR 1.
+  # order-service'in açtığı topic'ler (order.created, şimdilik product.changed, DLT'ler). Compose'da 3 broker;
+  # testlerde tek broker olduğu için RF ve min ISR 1.
   kafka:
     topics:
       partitions: 3

@@ -1,21 +1,28 @@
 package com.deveyk.orderflow.order.testsupport;
 
+import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.testsupport.LogTrackerConfiguration;
 import com.deveyk.orderflow.shared.testsupport.container.OrderflowContainers;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvc;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @SpringBootTest
@@ -54,11 +61,30 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    private JsonMapper jsonMapper;
+
     protected OrderflowMockMvc orderflowMockMvc;
 
     @BeforeEach
     void cleanDatabase() {
         databaseCleaner.clean();
         orderflowMockMvc = new OrderflowMockMvc(mockMvc);
+    }
+
+    // Debezium'un yazdığı gibi: key = aggregateId, değer zarfın JSON'u, "id" header'ında eventId (6b).
+    protected RecordMetadata publishEvent(final String topic, final OrderflowEvent<?> event) {
+        final ProducerRecord<String, String> record = new ProducerRecord<>(topic, null,
+                event.metadata().aggregateId(), jsonMapper.writeValueAsString(event),
+                List.of(new RecordHeader("id", event.metadata().eventId().toString().getBytes(StandardCharsets.UTF_8))));
+        return kafkaTemplate.send(record).join().getRecordMetadata();
+    }
+
+    // Zarf olmayan ya da bozuk mesajlar için.
+    protected RecordMetadata publishRaw(final String topic, final String key, final String value) {
+        return kafkaTemplate.send(topic, key, value).join().getRecordMetadata();
     }
 }

@@ -5,9 +5,11 @@ import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductSnapshotReadPort {
 
-    // Bulunamayan id'ler sonuçta yer almaz; exception fırlatılmaz.
     List<ProductSnapshot> findAllByIds(Collection<ProductId> productIds);
+
+    Optional<ProductSnapshot> findById(ProductId productId);
 }

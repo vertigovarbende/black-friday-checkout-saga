@@ -16,6 +16,7 @@ final class ProductSnapshotEntityToDomainMapper {
                 .id(new ProductId(entity.getId()))
                 .name(entity.getName())
                 .unitPrice(new Money(entity.getUnitPrice(), Currency.getInstance(entity.getCurrency())))
+                .productVersion(entity.getProductVersion())
                 .version(entity.getVersion())
                 .build();
     }

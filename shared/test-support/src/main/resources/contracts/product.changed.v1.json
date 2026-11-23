@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "eventId": "0198a1b2-0000-7000-8000-00000000e101",
+    "eventType": "ProductChanged",
+    "aggregateType": "product",
+    "aggregateId": "0198a1b2-0000-7000-8000-000000000101",
+    "source": "product-service",
+    "version": "1",
+    "occurredAt": "2026-11-27T10:00:00Z",
+    "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736"
+  },
+  "payload": {
+    "productId": "0198a1b2-0000-7000-8000-000000000101",
+    "name": "Wireless Headphones Pro",
+    "unitPrice": {
+      "amount": "279.90",
+      "currency": "TRY"
+    },
+    "productVersion": 3
+  }
+}
