@@ -1,30 +1,25 @@
 package com.deveyk.orderflow.order.adapter.in.web.facade.impl;
 
-import com.deveyk.orderflow.order.adapter.in.web.mapper.OrderWebMapper;
 import com.deveyk.orderflow.order.adapter.in.web.request.PlaceOrderRequest;
 import com.deveyk.orderflow.order.adapter.in.web.response.OrderResponse;
 import com.deveyk.orderflow.order.adapter.in.web.response.PlaceOrderResponse;
 import com.deveyk.orderflow.order.application.order.usecase.GetOrderUseCase;
 import com.deveyk.orderflow.order.application.order.usecase.PlaceOrderUseCase;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderNotFoundException;
-import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderRequestBuilder;
+import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderUseCaseBuilder;
 import com.deveyk.orderflow.shared.application.UseCaseHandler;
 import com.deveyk.orderflow.shared.testsupport.OrderflowUnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +39,7 @@ class OrderFacadeImplTest extends OrderflowUnitTest {
 
     @BeforeEach
     void setUpFacade() {
-        facade = new OrderFacadeImpl(placeOrderUseCaseHandler, getOrderUseCaseHandler, Mappers.getMapper(OrderWebMapper.class));
+        facade = new OrderFacadeImpl(placeOrderUseCaseHandler, getOrderUseCaseHandler);
     }
 
     @Test
@@ -54,11 +49,16 @@ class OrderFacadeImplTest extends OrderflowUnitTest {
         final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
                 .withLine(OrderValidTestData.Product.ID, 2)
                 .build();
-        final PlaceOrderUseCase expectedUseCase = new PlaceOrderUseCase(new CustomerId(USER_ID), List.of(
-                new PlaceOrderUseCase.Line(new ProductId(OrderValidTestData.Product.ID), new Quantity(2))));
+
+        final PlaceOrderUseCase expectedUseCase = new PlaceOrderUseCaseBuilder()
+                .withCustomerId(OrderValidTestData.Customer.CUSTOMER_ID)
+                .withLine(OrderValidTestData.Product.PRODUCT_ID, 2)
+                .build();
+
         final Order placed = new OrderBuilder()
                 .withValidValues()
                 .build();
+
         Mockito.when(placeOrderUseCaseHandler.handle(expectedUseCase))
                 .thenReturn(placed);
 
@@ -66,7 +66,10 @@ class OrderFacadeImplTest extends OrderflowUnitTest {
         final PlaceOrderResponse response = facade.placeOrder(USER_ID, request);
 
         // Then
-        assertThat(response).isEqualTo(new PlaceOrderResponse(placed.getId().value(), "PENDING"));
+        assertThat(response).isEqualTo(PlaceOrderResponse.builder()
+                .orderId(placed.getId().value())
+                .status("PENDING")
+                .build());
 
         // Verify
         Mockito.verify(placeOrderUseCaseHandler, Mockito.times(1)).handle(expectedUseCase);
@@ -80,7 +83,8 @@ class OrderFacadeImplTest extends OrderflowUnitTest {
         final Order order = new OrderBuilder()
                 .withValidValues()
                 .build();
-        final GetOrderUseCase expectedUseCase = new GetOrderUseCase(order.getId(), new CustomerId(USER_ID));
+
+        final GetOrderUseCase expectedUseCase = new GetOrderUseCase(order.getId(), OrderValidTestData.Customer.CUSTOMER_ID);
         Mockito.when(getOrderUseCaseHandler.handle(expectedUseCase))
                 .thenReturn(order);
 
@@ -101,7 +105,7 @@ class OrderFacadeImplTest extends OrderflowUnitTest {
     void givenHandlerThrows_whenGetOrder_thenExceptionPropagates() {
         // Given
         final OrderId orderId = OrderId.newId();
-        final GetOrderUseCase useCase = new GetOrderUseCase(orderId, new CustomerId(USER_ID));
+        final GetOrderUseCase useCase = new GetOrderUseCase(orderId, OrderValidTestData.Customer.CUSTOMER_ID);
         Mockito.when(getOrderUseCaseHandler.handle(useCase))
                 .thenThrow(new OrderNotFoundException(orderId));
 

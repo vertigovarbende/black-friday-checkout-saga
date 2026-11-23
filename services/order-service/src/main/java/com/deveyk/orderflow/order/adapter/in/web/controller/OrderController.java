@@ -25,24 +25,29 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class OrderController {
 
+    static final String ORDER_PATH = "/{orderId}";
+
     private final OrderFacade orderFacade;
 
-    // Komut: 202 + Location + PENDING. Sonraki durum değişiklikleri asenkron gelir (ADR-0011).
     @PostMapping
     ResponseEntity<PlaceOrderResponse> placeOrder(@RequestHeader(OrderflowHeaders.USER_ID) final UUID userId,
                                                   @Valid @RequestBody final PlaceOrderRequest request) {
+
         final PlaceOrderResponse response = orderFacade.placeOrder(userId, request);
+
         final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{orderId}")
+                .path(ORDER_PATH)
                 .buildAndExpand(response.orderId())
                 .toUri();
+
         return ResponseEntity.accepted().location(location).body(response);
     }
 
-    // Replica'dan okunur; sipariş verildikten hemen sonra kısa bir süre 404 dönebilir (ADR-0011).
-    @GetMapping("/{orderId}")
-    OrderResponse getOrder(@RequestHeader(OrderflowHeaders.USER_ID) final UUID userId,
-                           @PathVariable final UUID orderId) {
-        return orderFacade.getOrder(userId, orderId);
+
+    @GetMapping(ORDER_PATH)
+    ResponseEntity<OrderResponse> getOrder(@RequestHeader(OrderflowHeaders.USER_ID) final UUID userId,
+                                           @PathVariable final UUID orderId) {
+        final OrderResponse response = orderFacade.getOrder(userId, orderId);
+        return ResponseEntity.ok(response);
     }
 }

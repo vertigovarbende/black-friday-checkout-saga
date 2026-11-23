@@ -2,8 +2,8 @@ package com.deveyk.orderflow.order.adapter.in.messaging;
 
 import ch.qos.logback.classic.Level;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
@@ -54,7 +54,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
         // Then
         final ProductSnapshot product = awaitProductVersion(productId, 1L);
         assertThat(product.getName()).isEqualTo(OrderValidTestData.Product.NAME);
-        assertThat(product.getUnitPrice()).isEqualTo(new Money(OrderValidTestData.Product.UNIT_PRICE, TRY));
+        assertThat(product.getUnitPrice()).isEqualTo(OrderValidTestData.Product.UNIT_PRICE_MONEY);
 
         final InboxAssert.InboxRow inbox = InboxAssert.of(jdbcTemplate)
                 .processedOnce(ProductChangedKafkaListener.CONSUMER, event.metadata().eventId());

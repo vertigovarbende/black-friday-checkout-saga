@@ -9,7 +9,7 @@ import com.deveyk.orderflow.shared.messaging.EventTypeNames;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.messaging.contract.order.OrderCreatedPayload;
-import com.deveyk.orderflow.shared.outbox.OutboxEventPort;
+import com.deveyk.orderflow.shared.outbox.port.OutboxEventPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

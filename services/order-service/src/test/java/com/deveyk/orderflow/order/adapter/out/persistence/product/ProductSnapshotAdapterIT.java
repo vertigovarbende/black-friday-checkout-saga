@@ -1,10 +1,11 @@
 package com.deveyk.orderflow.order.adapter.out.persistence.product;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
+import com.deveyk.orderflow.order.testsupport.builder.ProductSnapshotBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ class ProductSnapshotAdapterIT extends OrderTestContainerConfiguration {
     @DisplayName("Seed'deki ürün kopyaları adı, fiyatı ve para birimiyle okunur; bilinmeyen id sonuçta yer almaz")
     void givenSeededAndUnknownIds_whenFindAllByIds_thenOnlySeededReturned() {
         // Given
-        final ProductId headphones = new ProductId(OrderValidTestData.Product.ID);
-        final ProductId cable = new ProductId(OrderValidTestData.SecondProduct.ID);
+        final ProductId headphones = OrderValidTestData.Product.PRODUCT_ID;
+        final ProductId cable = OrderValidTestData.SecondProduct.PRODUCT_ID;
         final ProductId unknown = new ProductId(UUID.randomUUID());
 
         // When
@@ -46,8 +47,8 @@ class ProductSnapshotAdapterIT extends OrderTestContainerConfiguration {
         assertThat(found)
                 .extracting(ProductSnapshot::getId, ProductSnapshot::getName, ProductSnapshot::getUnitPrice)
                 .containsExactlyInAnyOrder(
-                        tuple(headphones, OrderValidTestData.Product.NAME, new Money(OrderValidTestData.Product.UNIT_PRICE, TRY)),
-                        tuple(cable, OrderValidTestData.SecondProduct.NAME, new Money(OrderValidTestData.SecondProduct.UNIT_PRICE, TRY))
+                        tuple(headphones, OrderValidTestData.Product.NAME, OrderValidTestData.Product.UNIT_PRICE_MONEY),
+                        tuple(cable, OrderValidTestData.SecondProduct.NAME, OrderValidTestData.SecondProduct.UNIT_PRICE_MONEY)
                 );
     }
 
@@ -62,7 +63,13 @@ class ProductSnapshotAdapterIT extends OrderTestContainerConfiguration {
     @DisplayName("Yeni kopya kaydedilir ve ürün sürümüyle birlikte okunur")
     void givenNewSnapshot_whenCreate_thenReadBackWithProductVersion() {
         // Given
-        final ProductSnapshot created = ProductSnapshot.create(new ProductId(UUID.randomUUID()), "Studio Monitor", NEW_PRICE, 2L);
+        final ProductSnapshot created = new ProductSnapshotBuilder()
+                .withValidValues()
+                .withRandomProduct()
+                .withName("Studio Monitor")
+                .withUnitPrice(NEW_PRICE)
+                .withProductVersion(2L)
+                .build();
 
         // When
         productSnapshotAdapter.create(created);
@@ -127,7 +134,12 @@ class ProductSnapshotAdapterIT extends OrderTestContainerConfiguration {
     }
 
     private ProductId createSnapshot(final long productVersion) {
-        final ProductSnapshot created = ProductSnapshot.create(new ProductId(UUID.randomUUID()), "Studio Monitor", new Money(OrderValidTestData.Product.UNIT_PRICE, TRY), productVersion);
+        final ProductSnapshot created = new ProductSnapshotBuilder()
+                .withValidValues()
+                .withRandomProduct()
+                .withName("Studio Monitor")
+                .withProductVersion(productVersion)
+                .build();
         productSnapshotAdapter.create(created);
         return created.getId();
     }

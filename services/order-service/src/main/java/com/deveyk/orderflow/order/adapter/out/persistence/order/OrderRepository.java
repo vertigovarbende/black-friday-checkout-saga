@@ -10,4 +10,5 @@ interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
 
     @EntityGraph(attributePaths = "lines")
     Optional<OrderEntity> findWithLinesById(UUID id);
+
 }

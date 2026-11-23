@@ -53,8 +53,11 @@ class OrderEntity extends BaseEntity {
     private List<OrderLineEntity> lines = new ArrayList<>();
 
     @Builder
-    private OrderEntity(final UUID id, final UUID customerId, final OrderStatus status,
-                        final CancellationReason cancellationReason, final Instant placedAt,
+    private OrderEntity(final UUID id,
+                        final UUID customerId,
+                        final OrderStatus status,
+                        final CancellationReason cancellationReason,
+                        final Instant placedAt,
                         final Instant lastModifiedAt) {
         this.id = id;
         this.customerId = customerId;

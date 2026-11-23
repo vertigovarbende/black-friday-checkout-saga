@@ -1,8 +1,6 @@
 package com.deveyk.orderflow.order.adapter.out.messaging;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
@@ -20,8 +18,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.deveyk.orderflow.order.testsupport.OrderValidTestData.TRY;
 
 class OrderCreatedContractTest {
 
@@ -42,8 +38,7 @@ class OrderCreatedContractTest {
                                 .build(),
                         new OrderLineBuilder()
                                 .withValidValues()
-                                .withProductId(new ProductId(OrderValidTestData.SecondProduct.ID))
-                                .withUnitPrice(new Money(OrderValidTestData.SecondProduct.UNIT_PRICE, TRY))
+                                .withSecondProduct()
                                 .build()))
                 .build();
 

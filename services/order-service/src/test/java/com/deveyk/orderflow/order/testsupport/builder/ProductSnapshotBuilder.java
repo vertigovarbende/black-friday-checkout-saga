@@ -1,10 +1,12 @@
 package com.deveyk.orderflow.order.testsupport.builder;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.shared.testsupport.TestDataBuilder;
+
+import java.util.UUID;
 
 public class ProductSnapshotBuilder implements TestDataBuilder<ProductSnapshot> {
 
@@ -15,11 +17,25 @@ public class ProductSnapshotBuilder implements TestDataBuilder<ProductSnapshot> 
     private long version;
 
     public ProductSnapshotBuilder withValidValues() {
-        this.id = new ProductId(OrderValidTestData.Product.ID);
+        this.id = OrderValidTestData.Product.PRODUCT_ID;
         this.name = OrderValidTestData.Product.NAME;
-        this.unitPrice = new Money(OrderValidTestData.Product.UNIT_PRICE, OrderValidTestData.TRY);
+        this.unitPrice = OrderValidTestData.Product.UNIT_PRICE_MONEY;
         this.productVersion = 0L;
         this.version = 0L;
+        return this;
+    }
+
+    // Seed'deki ikinci ürün (USB-C Cable): kimliği, adı ve fiyatı birlikte
+    public ProductSnapshotBuilder withSecondProduct() {
+        this.id = OrderValidTestData.SecondProduct.PRODUCT_ID;
+        this.name = OrderValidTestData.SecondProduct.NAME;
+        this.unitPrice = OrderValidTestData.SecondProduct.UNIT_PRICE_MONEY;
+        return this;
+    }
+
+    // Seed'de olmayan, her çağrıda yeni bir ürün; DB testlerinde seed'deki kopyalar değişmesin diye (07, karar 13)
+    public ProductSnapshotBuilder withRandomProduct() {
+        this.id = new ProductId(UUID.randomUUID());
         return this;
     }
 
@@ -40,6 +56,11 @@ public class ProductSnapshotBuilder implements TestDataBuilder<ProductSnapshot> 
 
     public ProductSnapshotBuilder withProductVersion(final long productVersion) {
         this.productVersion = productVersion;
+        return this;
+    }
+
+    public ProductSnapshotBuilder withVersion(final long version) {
+        this.version = version;
         return this;
     }
 

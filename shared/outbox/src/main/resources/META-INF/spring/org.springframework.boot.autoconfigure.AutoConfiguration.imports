@@ -1,1 +1,1 @@
-com.deveyk.orderflow.shared.outbox.OutboxAutoConfiguration
+com.deveyk.orderflow.shared.outbox.config.OutboxAutoConfiguration

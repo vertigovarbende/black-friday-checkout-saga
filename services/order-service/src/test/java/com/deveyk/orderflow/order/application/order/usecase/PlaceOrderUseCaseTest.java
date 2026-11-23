@@ -1,7 +1,6 @@
 package com.deveyk.orderflow.order.application.order.usecase;
 
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
@@ -18,9 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlaceOrderUseCaseTest {
 
-    private static final CustomerId CUSTOMER = new CustomerId(OrderValidTestData.Customer.ID);
-    private static final PlaceOrderUseCase.Line LINE =
-            new PlaceOrderUseCase.Line(new ProductId(OrderValidTestData.Product.ID), new Quantity(1));
+    private static final CustomerId CUSTOMER = OrderValidTestData.Customer.CUSTOMER_ID;
+    private static final PlaceOrderUseCase.Line LINE = new PlaceOrderUseCase.Line(OrderValidTestData.Product.PRODUCT_ID, new Quantity(1));
 
     @Test
     @DisplayName("Müşterisi olmayan sipariş isteği oluşturulamaz")
@@ -57,7 +55,7 @@ class PlaceOrderUseCaseTest {
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.PRODUCT_REQUIRED));
 
-        assertThatThrownBy(() -> new PlaceOrderUseCase.Line(new ProductId(OrderValidTestData.Product.ID), null))
+        assertThatThrownBy(() -> new PlaceOrderUseCase.Line(OrderValidTestData.Product.PRODUCT_ID, null))
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.QUANTITY_REQUIRED));
     }

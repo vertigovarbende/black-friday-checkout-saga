@@ -3,11 +3,8 @@ package com.deveyk.orderflow.order.adapter.in.web.controller;
 import com.deveyk.orderflow.order.adapter.in.web.request.PlaceOrderRequest;
 import com.deveyk.orderflow.order.application.order.port.OrderReadPort;
 import com.deveyk.orderflow.order.application.order.port.OrderSavePort;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
-import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
@@ -26,11 +23,11 @@ import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.deveyk.orderflow.order.testsupport.OrderValidTestData.TRY;
@@ -42,7 +39,6 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
 
     private static final String BASE_PATH = "/api/v1/orders";
     private static final UUID USER_ID = OrderValidTestData.Customer.ID;
-    private static final UUID SOMEONE_ELSE = UUID.fromString("0198a1b2-0000-7000-8000-000000000002");
 
     @Autowired
     private OrderReadPort orderReadPort;
@@ -58,9 +54,8 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
     void givenSeededProducts_whenPlaceOrder_thenAcceptedAndPendingOrderPersisted() throws Exception {
         // Given
         final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
-                .withLines(List.of(
-                        new PlaceOrderRequest.Line(OrderValidTestData.Product.ID, 2),
-                        new PlaceOrderRequest.Line(OrderValidTestData.SecondProduct.ID, 1)))
+                .withLine(OrderValidTestData.Product.ID, 2)
+                .withLine(OrderValidTestData.SecondProduct.ID, 1)
                 .build();
 
         // When
@@ -72,17 +67,17 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
 
         // Then
         final UUID orderId = UUID.fromString(JsonPath.read(result.getResponse().getContentAsString(), "$.orderId"));
-        assertThat(result.getResponse().getHeader("Location")).endsWith(BASE_PATH + "/" + orderId);
+        assertThat(result.getResponse().getHeader(HttpHeaders.LOCATION)).isEqualTo("http://localhost" + BASE_PATH + "/" + orderId);
 
         // Verify
         final Order persisted = orderReadPort.findById(new OrderId(orderId)).orElseThrow();
-        assertThat(persisted.getCustomerId()).isEqualTo(new CustomerId(USER_ID));
+        assertThat(persisted.getCustomerId()).isEqualTo(OrderValidTestData.Customer.CUSTOMER_ID);
         assertThat(persisted.getStatus()).isEqualTo(OrderStatus.PENDING);
         assertThat(persisted.getLines())
                 .extracting(OrderLine::getProductId, OrderLine::getProductName, OrderLine::getUnitPrice, OrderLine::getQuantity)
                 .containsExactly(
-                        tuple(new ProductId(OrderValidTestData.Product.ID), OrderValidTestData.Product.NAME, new Money(OrderValidTestData.Product.UNIT_PRICE, TRY), new Quantity(2)),
-                        tuple(new ProductId(OrderValidTestData.SecondProduct.ID), OrderValidTestData.SecondProduct.NAME, new Money(OrderValidTestData.SecondProduct.UNIT_PRICE, TRY), new Quantity(1))
+                        tuple(OrderValidTestData.Product.PRODUCT_ID, OrderValidTestData.Product.NAME, OrderValidTestData.Product.UNIT_PRICE_MONEY, new Quantity(2)),
+                        tuple(OrderValidTestData.SecondProduct.PRODUCT_ID, OrderValidTestData.SecondProduct.NAME, OrderValidTestData.SecondProduct.UNIT_PRICE_MONEY, new Quantity(1))
                 );
         final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId.toString(), EventTypeNames.ORDER_CREATED);
         assertThat(event.topic()).isEqualTo(TopicNames.ORDER_CREATED);
@@ -93,9 +88,8 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
     void givenUnknownProduct_whenPlaceOrder_thenBusinessRuleErrorAndNothingPersisted() throws Exception {
         // Given
         final PlaceOrderRequest request = new PlaceOrderRequestBuilder()
-                .withLines(List.of(
-                        new PlaceOrderRequest.Line(OrderValidTestData.Product.ID, 1),
-                        new PlaceOrderRequest.Line(UUID.randomUUID(), 1)))
+                .withLine(OrderValidTestData.Product.ID, 1)
+                .withLine(UUID.randomUUID(), 1)
                 .build();
 
         // When / Then
@@ -113,7 +107,7 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
         // Given
         final Order order = new OrderBuilder()
                 .withValidValues()
-                .withCustomerId(new CustomerId(USER_ID))
+                .withCustomerId(OrderValidTestData.Customer.CUSTOMER_ID)
                 .build();
         orderSavePort.create(order);
 
@@ -135,7 +129,7 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
         // Given
         final Order order = new OrderBuilder()
                 .withValidValues()
-                .withCustomerId(new CustomerId(SOMEONE_ELSE))
+                .withCustomerId(OrderValidTestData.OtherCustomer.CUSTOMER_ID)
                 .build();
         orderSavePort.create(order);
 

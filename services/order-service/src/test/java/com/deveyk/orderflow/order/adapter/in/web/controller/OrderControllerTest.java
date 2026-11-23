@@ -1,11 +1,11 @@
 package com.deveyk.orderflow.order.adapter.in.web.controller;
 
 import com.deveyk.orderflow.order.adapter.in.web.facade.OrderFacade;
-import com.deveyk.orderflow.order.adapter.in.web.mapper.OrderWebMapper;
+import com.deveyk.orderflow.order.adapter.in.web.mapper.OrderToResponseMapper;
 import com.deveyk.orderflow.order.adapter.in.web.request.PlaceOrderRequest;
 import com.deveyk.orderflow.order.adapter.in.web.response.OrderResponse;
 import com.deveyk.orderflow.order.adapter.in.web.response.PlaceOrderResponse;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.domain.order.exception.OrderNotFoundException;
 import com.deveyk.orderflow.order.domain.order.exception.ProductNotAvailableException;
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -35,15 +35,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.endsWith;
 
 @WebMvcTest(OrderController.class)
 class OrderControllerTest extends OrderflowRestControllerTest {
 
     private static final String BASE_PATH = "/api/v1/orders";
     private static final UUID USER_ID = OrderValidTestData.Customer.ID;
-
-    private final OrderWebMapper orderWebMapper = Mappers.getMapper(OrderWebMapper.class);
 
     @MockitoBean
     private OrderFacade orderFacade;
@@ -57,12 +54,15 @@ class OrderControllerTest extends OrderflowRestControllerTest {
                 .build();
         final UUID orderId = OrderId.newId().value();
         Mockito.when(orderFacade.placeOrder(USER_ID, request))
-                .thenReturn(new PlaceOrderResponse(orderId, "PENDING"));
+                .thenReturn(PlaceOrderResponse.builder()
+                        .orderId(orderId)
+                        .status("PENDING")
+                        .build());
 
         // When / Then
         orderflowMockMvc.perform(OrderflowMockMvcRequestBuilders.post(BASE_PATH, USER_ID, request))
                 .andExpect(OrderflowMockResultMatchersBuilders.status().isAccepted())
-                .andExpect(MockMvcResultMatchers.header().string("Location", endsWith(BASE_PATH + "/" + orderId)))
+                .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.LOCATION, "http://localhost" + BASE_PATH + "/" + orderId))
                 .andExpect(OrderflowMockResultMatchersBuilders.response("orderId").value(orderId.toString()))
                 .andExpect(OrderflowMockResultMatchersBuilders.response("status").value("PENDING"));
 
@@ -200,7 +200,7 @@ class OrderControllerTest extends OrderflowRestControllerTest {
         final Order order = new OrderBuilder()
                 .withValidValues()
                 .build();
-        final OrderResponse response = orderWebMapper.toOrderResponse(order);
+        final OrderResponse response = OrderToResponseMapper.toOrderResponse(order);
         final UUID orderId = order.getId().value();
         Mockito.when(orderFacade.getOrder(USER_ID, orderId))
                 .thenReturn(response);

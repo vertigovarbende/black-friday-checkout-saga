@@ -10,9 +10,9 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 
 @SpringBootApplication
-class SharedInboxTestApplication {
+public class SharedInboxTestApplication {
 
-    static final Instant NOW = Instant.parse("2026-11-27T10:00:00Z");
+    public static final Instant NOW = Instant.parse("2026-11-27T10:00:00Z");
 
     @Bean
     Clock clock() {

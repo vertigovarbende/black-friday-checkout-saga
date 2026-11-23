@@ -2,7 +2,7 @@ package com.deveyk.orderflow.order.delivery;
 
 import ch.qos.logback.classic.Level;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderDeliveryTestConfiguration;
 import com.deveyk.orderflow.order.testsupport.builder.ProductChangedEventBuilder;
