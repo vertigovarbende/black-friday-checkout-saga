@@ -1,7 +1,6 @@
 package com.deveyk.orderflow.order.domain.product.model;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
 import com.deveyk.orderflow.order.domain.product.exception.ProductSnapshotErrorCode;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.ProductSnapshotBuilder;
@@ -28,9 +27,9 @@ class ProductSnapshotTest {
                 .build();
 
         // Then
-        assertThat(product.getId()).isEqualTo(new ProductId(OrderValidTestData.Product.ID));
+        assertThat(product.getId()).isEqualTo(OrderValidTestData.Product.PRODUCT_ID);
         assertThat(product.getName()).isEqualTo(OrderValidTestData.Product.NAME);
-        assertThat(product.getUnitPrice()).isEqualTo(new Money(OrderValidTestData.Product.UNIT_PRICE, TRY));
+        assertThat(product.getUnitPrice()).isEqualTo(OrderValidTestData.Product.UNIT_PRICE_MONEY);
         assertThat(product.getVersion()).isZero();
     }
 
@@ -38,22 +37,21 @@ class ProductSnapshotTest {
     @DisplayName("Yeni kopya product.changed'deki ürün sürümüyle oluşturulur; kendi optimistic lock sürümü 0'dır")
     void givenValidValues_whenCreate_thenFieldsAndVersionsSet() {
         // When
-        final ProductSnapshot product = ProductSnapshot.create(new ProductId(OrderValidTestData.Product.ID),
-                OrderValidTestData.Product.NAME, new Money(OrderValidTestData.Product.UNIT_PRICE, TRY), 3L);
+        final ProductSnapshot product = ProductSnapshot.create(OrderValidTestData.Product.PRODUCT_ID,
+                OrderValidTestData.Product.NAME, OrderValidTestData.Product.UNIT_PRICE_MONEY, 3L);
 
         // Then
         assertThat(product.getName()).isEqualTo(OrderValidTestData.Product.NAME);
-        assertThat(product.getUnitPrice()).isEqualTo(new Money(OrderValidTestData.Product.UNIT_PRICE, TRY));
+        assertThat(product.getUnitPrice()).isEqualTo(OrderValidTestData.Product.UNIT_PRICE_MONEY);
         assertThat(product.getProductVersion()).isEqualTo(3L);
         assertThat(product.getVersion()).isZero();
     }
 
     @Test
     @DisplayName("Negatif ürün sürümüyle kopya oluşturulamaz")
-    void givenNegativeProductVersion_whenCreate_thenRejected() {
+    void givenNegativeProductVersion_whenRehydrate_thenRejected() {
         // When / Then
-        assertThatThrownBy(() -> ProductSnapshot.create(new ProductId(OrderValidTestData.Product.ID),
-                OrderValidTestData.Product.NAME, new Money(OrderValidTestData.Product.UNIT_PRICE, TRY), -1L))
+        assertThatThrownBy(() -> new ProductSnapshotBuilder().withValidValues().withProductVersion(-1L).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ProductSnapshotErrorCode.PRODUCT_VERSION_NEGATIVE));
     }
@@ -88,7 +86,7 @@ class ProductSnapshotTest {
         // Then
         assertThat(applied).isFalse();
         assertThat(product.getName()).isEqualTo(OrderValidTestData.Product.NAME);
-        assertThat(product.getUnitPrice()).isEqualTo(new Money(OrderValidTestData.Product.UNIT_PRICE, TRY));
+        assertThat(product.getUnitPrice()).isEqualTo(OrderValidTestData.Product.UNIT_PRICE_MONEY);
         assertThat(product.getProductVersion()).isEqualTo(2L);
     }
 

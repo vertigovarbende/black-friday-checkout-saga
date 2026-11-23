@@ -14,16 +14,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 class GetOrderUseCaseHandlerTest extends OrderflowUnitTest {
 
-    private static final CustomerId OWNER = new CustomerId(OrderValidTestData.Customer.ID);
-    private static final CustomerId SOMEONE_ELSE = new CustomerId(UUID.fromString("0198a1b2-0000-7000-8000-000000000002"));
+    private static final CustomerId OWNER = OrderValidTestData.Customer.CUSTOMER_ID;
+    private static final CustomerId SOMEONE_ELSE = OrderValidTestData.OtherCustomer.CUSTOMER_ID;
 
     private final InMemoryOrderAdapter orderAdapter = new InMemoryOrderAdapter();
 

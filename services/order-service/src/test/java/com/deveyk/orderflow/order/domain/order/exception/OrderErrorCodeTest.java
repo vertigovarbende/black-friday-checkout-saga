@@ -1,7 +1,7 @@
 package com.deveyk.orderflow.order.domain.order.exception;
 
 import com.deveyk.orderflow.order.adapter.in.messaging.MessagingErrorCode;
-import com.deveyk.orderflow.order.domain.common.CommonDomainErrorCode;
+import com.deveyk.orderflow.order.domain.common.exception.CommonDomainErrorCode;
 import com.deveyk.orderflow.order.domain.product.exception.ProductSnapshotErrorCode;
 import com.deveyk.orderflow.shared.domain.exception.ErrorCode;
 import com.deveyk.orderflow.shared.testsupport.exception.ErrorCodeAssert;

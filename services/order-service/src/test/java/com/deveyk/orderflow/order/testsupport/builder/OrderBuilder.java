@@ -25,7 +25,7 @@ public class OrderBuilder implements TestDataBuilder<Order> {
 
     public OrderBuilder withValidValues() {
         this.id = OrderId.newId();
-        this.customerId = new CustomerId(OrderValidTestData.Customer.ID);
+        this.customerId = OrderValidTestData.Customer.CUSTOMER_ID;
         this.lines = List.of(new OrderLineBuilder().withValidValues().build());
         this.placedAt = OrderValidTestData.NOW;
         this.status = OrderStatus.PENDING;
@@ -57,6 +57,21 @@ public class OrderBuilder implements TestDataBuilder<Order> {
 
     public OrderBuilder withLines(final List<OrderLine> lines) {
         this.lines = lines;
+        return this;
+    }
+
+    public OrderBuilder withPlacedAt(final Instant placedAt) {
+        this.placedAt = placedAt;
+        return this;
+    }
+
+    public OrderBuilder withLastModifiedAt(final Instant lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
+        return this;
+    }
+
+    public OrderBuilder withVersion(final long version) {
+        this.version = version;
         return this;
     }
 

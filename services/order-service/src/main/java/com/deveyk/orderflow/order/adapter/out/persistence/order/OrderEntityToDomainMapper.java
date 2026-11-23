@@ -1,8 +1,8 @@
 package com.deveyk.orderflow.order.adapter.out.persistence.order;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;

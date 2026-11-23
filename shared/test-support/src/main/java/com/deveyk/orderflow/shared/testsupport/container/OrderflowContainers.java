@@ -9,7 +9,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
-// Image'lar infra/docker/compose.yml ile aynı. Postgres, Kafka ve Connect aynı Network'te; Connect diğerlerine alias'la bağlanır.
 public final class OrderflowContainers {
 
     public static final String POSTGRES_IMAGE = "postgres:18.7";

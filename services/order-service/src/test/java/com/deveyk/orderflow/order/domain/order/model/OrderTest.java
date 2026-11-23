@@ -1,7 +1,7 @@
 package com.deveyk.orderflow.order.domain.order.model;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.InvalidOrderStateException;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
 
-    private static final CustomerId CUSTOMER = new CustomerId(OrderValidTestData.Customer.ID);
     private static final Instant LATER = NOW.plusSeconds(60);
 
     @Test
@@ -44,7 +43,7 @@ class OrderTest {
                 .build();
 
         // When
-        final Order order = Order.place(CUSTOMER, List.of(first, second), NOW);
+        final Order order = Order.place(OrderValidTestData.Customer.CUSTOMER_ID, List.of(first, second), NOW);
 
         // Then
         assertThat(order.getId()).isNotNull();
@@ -64,7 +63,7 @@ class OrderTest {
         final List<OrderLine> lines = linesWithDistinctProducts(Order.MAX_LINES + 1);
 
         // When / Then
-        assertThatThrownBy(() -> Order.place(CUSTOMER, lines, NOW))
+        assertThatThrownBy(() -> Order.place(OrderValidTestData.Customer.CUSTOMER_ID, lines, NOW))
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.TOO_MANY_LINES));
     }
@@ -87,28 +86,25 @@ class OrderTest {
 
     @Test
     @DisplayName("Satırı olmayan sipariş verilemez")
-    void givenNoLines_whenPlace_thenRejected() {
+    void givenNoLines_whenRehydrate_thenRejected() {
         // When / Then
-        assertThatThrownBy(() -> Order.place(CUSTOMER, List.of(), NOW))
+        assertThatThrownBy(() -> new OrderBuilder().withValidValues().withLines(List.of()).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.ORDER_LINES_REQUIRED));
     }
 
     @Test
     @DisplayName("Müşterisi olmayan sipariş verilemez")
-    void givenNoCustomer_whenPlace_thenRejected() {
-        // Given
-        final List<OrderLine> lines = List.of(new OrderLineBuilder().withValidValues().build());
-
+    void givenNoCustomer_whenRehydrate_thenRejected() {
         // When / Then
-        assertThatThrownBy(() -> Order.place(null, lines, NOW))
+        assertThatThrownBy(() -> new OrderBuilder().withValidValues().withCustomerId(null).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.CUSTOMER_REQUIRED));
     }
 
     @Test
     @DisplayName("Satırları farklı para birimlerinde olan sipariş verilemez")
-    void givenMixedCurrencies_whenPlace_thenRejected() {
+    void givenMixedCurrencies_whenRehydrate_thenRejected() {
         // Given
         final OrderLine lira = new OrderLineBuilder()
                 .withValidValues()
@@ -121,14 +117,14 @@ class OrderTest {
                 .build();
 
         // When / Then
-        assertThatThrownBy(() -> Order.place(CUSTOMER, List.of(lira, euro), NOW))
+        assertThatThrownBy(() -> new OrderBuilder().withValidValues().withLines(List.of(lira, euro)).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.MIXED_CURRENCY));
     }
 
     @Test
     @DisplayName("Aynı ürün iki satırda olamaz; satırlar birleştirilmez, sipariş reddedilir")
-    void givenSameProductTwice_whenPlace_thenRejected() {
+    void givenSameProductTwice_whenRehydrate_thenRejected() {
         // Given
         final OrderLine first = new OrderLineBuilder()
                 .withValidValues()
@@ -140,7 +136,7 @@ class OrderTest {
                 .build();
 
         // When / Then
-        assertThatThrownBy(() -> Order.place(CUSTOMER, List.of(first, second), NOW))
+        assertThatThrownBy(() -> new OrderBuilder().withValidValues().withLines(List.of(first, second)).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.DUPLICATE_PRODUCT_LINE));
     }
@@ -306,14 +302,12 @@ class OrderTest {
                 .withValidValues()
                 .build();
 
-        final Order sameIdCompleted = Order.rehydrate()
-                .id(order.getId())
-                .customerId(order.getCustomerId())
-                .lines(order.getLines())
-                .placedAt(order.getPlacedAt())
-                .status(OrderStatus.COMPLETED)
-                .lastModifiedAt(LATER)
-                .version(3L)
+        final Order sameIdCompleted = new OrderBuilder()
+                .withValidValues()
+                .withId(order.getId())
+                .withStatus(OrderStatus.COMPLETED)
+                .withLastModifiedAt(LATER)
+                .withVersion(3L)
                 .build();
 
         // Then

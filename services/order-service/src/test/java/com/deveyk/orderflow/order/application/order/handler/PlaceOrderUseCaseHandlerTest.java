@@ -3,17 +3,17 @@ package com.deveyk.orderflow.order.application.order.handler;
 import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.application.order.usecase.PlaceOrderUseCase;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.domain.order.exception.ProductNotAvailableException;
-import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.order.domain.order.model.OrderStatus;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
+import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderUseCaseBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.ProductSnapshotBuilder;
 import com.deveyk.orderflow.order.testsupport.fake.InMemoryOrderAdapter;
 import com.deveyk.orderflow.shared.testsupport.OrderflowUnitTest;
@@ -38,25 +38,25 @@ import static org.assertj.core.api.Assertions.tuple;
 
 class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
 
-    private static final CustomerId CUSTOMER = new CustomerId(OrderValidTestData.Customer.ID);
-
     private static final ProductSnapshot HEADPHONES = new ProductSnapshotBuilder()
             .withValidValues()
             .build();
 
     private static final ProductSnapshot CABLE = new ProductSnapshotBuilder()
             .withValidValues()
-            .withId(new ProductId(OrderValidTestData.SecondProduct.ID))
-            .withName(OrderValidTestData.SecondProduct.NAME)
-            .withUnitPrice(new Money(OrderValidTestData.SecondProduct.UNIT_PRICE, TRY))
+            .withSecondProduct()
             .build();
 
     @Mock
     private ProductSnapshotReadPort productSnapshotReadPort;
+
     @Mock
     private OrderDomainEventPort orderDomainEventPort;
+
     private final InMemoryOrderAdapter orderAdapter = new InMemoryOrderAdapter();
+
     private final MutableClock clock = MutableClock.at(NOW);
+
     private PlaceOrderUseCaseHandler handler;
 
     @BeforeEach
@@ -68,10 +68,11 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
     @DisplayName("Satırların adı ve fiyatı ürün kopyasından alınır; sipariş PENDING olarak kaydedilir")
     void givenKnownProducts_whenHandle_thenOrderPlacedWithSnapshotNameAndPrice() {
         // Given
-        final PlaceOrderUseCase useCase = new PlaceOrderUseCase(CUSTOMER, List.of(
-                new PlaceOrderUseCase.Line(HEADPHONES.getId(), new Quantity(2)),
-                new PlaceOrderUseCase.Line(CABLE.getId(), new Quantity(1))
-        ));
+        final PlaceOrderUseCase useCase = new PlaceOrderUseCaseBuilder()
+                .withCustomerId(OrderValidTestData.Customer.CUSTOMER_ID)
+                .withLine(HEADPHONES.getId(), 2)
+                .withLine(CABLE.getId(), 1)
+                .build();
         Mockito.when(productSnapshotReadPort.findAllByIds(Set.of(HEADPHONES.getId(), CABLE.getId())))
                 .thenReturn(List.of(CABLE, HEADPHONES));
 
@@ -79,7 +80,7 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
         final Order placed = handler.handle(useCase);
 
         // Then
-        assertThat(placed.getCustomerId()).isEqualTo(CUSTOMER);
+        assertThat(placed.getCustomerId()).isEqualTo(OrderValidTestData.Customer.CUSTOMER_ID);
         assertThat(placed.getStatus()).isEqualTo(OrderStatus.PENDING);
         assertThat(placed.getPlacedAt()).isEqualTo(NOW);
         assertThat(placed.getTotal()).isEqualTo(new Money(new BigDecimal("514.80"), TRY));
@@ -102,10 +103,11 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
     void givenUnknownProduct_whenHandle_thenProductNotAvailableAndNothingSaved() {
         // Given
         final ProductId unknown = new ProductId(UUID.fromString("0198a1b2-0000-7000-8000-00000000dead"));
-        final PlaceOrderUseCase useCase = new PlaceOrderUseCase(CUSTOMER, List.of(
-                new PlaceOrderUseCase.Line(HEADPHONES.getId(), new Quantity(1)),
-                new PlaceOrderUseCase.Line(unknown, new Quantity(1))
-        ));
+        final PlaceOrderUseCase useCase = new PlaceOrderUseCaseBuilder()
+                .withCustomerId(OrderValidTestData.Customer.CUSTOMER_ID)
+                .withLine(HEADPHONES.getId(), 1)
+                .withLine(unknown, 1)
+                .build();
         Mockito.when(productSnapshotReadPort.findAllByIds(Set.of(HEADPHONES.getId(), unknown)))
                 .thenReturn(List.of(HEADPHONES));
 
@@ -127,9 +129,9 @@ class PlaceOrderUseCaseHandlerTest extends OrderflowUnitTest {
     void givenAdvancedClock_whenHandle_thenPlacedAtFromClock() {
         // Given
         clock.advance(Duration.ofMinutes(5));
-        final PlaceOrderUseCase useCase = new PlaceOrderUseCase(CUSTOMER, List.of(
-                new PlaceOrderUseCase.Line(HEADPHONES.getId(), new Quantity(1))
-        ));
+        final PlaceOrderUseCase useCase = new PlaceOrderUseCaseBuilder()
+                .withValidValues()
+                .build();
         Mockito.when(productSnapshotReadPort.findAllByIds(Set.of(HEADPHONES.getId())))
                 .thenReturn(List.of(HEADPHONES));
 

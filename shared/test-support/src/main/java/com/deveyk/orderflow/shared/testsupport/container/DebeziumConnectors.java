@@ -27,7 +27,6 @@ public final class DebeziumConnectors {
     private DebeziumConnectors() {
     }
 
-    // Adı dosyanın adıdır (order-outbox.json → order-outbox), register-connector.sh ile aynı. Task RUNNING olana kadar bekler.
     public static void register(final GenericContainer<?> connect, final Path configFile, final Map<String, String> overrides) {
 
         final String name = configFile.getFileName().toString().replaceFirst("\\.json$", "");
@@ -50,7 +49,6 @@ public final class DebeziumConnectors {
                 .until(() -> "RUNNING".equals(taskState(connect, name)));
     }
 
-    // Task henüz atanmadıysa null. FAILED ise beklemeden hatayı (Connect'in stack trace'iyle) fırlatır.
     @SuppressWarnings("unchecked")
     private static String taskState(final GenericContainer<?> connect, final String name) {
 

@@ -59,9 +59,6 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
     private OrderDatabaseCleaner databaseCleaner;
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
@@ -72,6 +69,11 @@ public abstract class OrderTestContainerConfiguration extends LogTrackerConfigur
     @BeforeEach
     void cleanDatabase() {
         databaseCleaner.clean();
+    }
+
+    // OrderflowRestControllerTest ile aynı: MockMvc alan yerine parametreyle alınır.
+    @BeforeEach
+    void setUpOrderflowMockMvc(@Autowired final MockMvc mockMvc) {
         orderflowMockMvc = new OrderflowMockMvc(mockMvc);
     }
 

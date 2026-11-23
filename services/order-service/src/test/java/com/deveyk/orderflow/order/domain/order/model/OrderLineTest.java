@@ -1,8 +1,7 @@
 package com.deveyk.orderflow.order.domain.order.model;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderLineBuilder;
@@ -23,9 +22,9 @@ class OrderLineTest {
     void givenValidValues_whenCreate_thenIdAssignedAndLineTotalComputed() {
         // When
         final OrderLine line = OrderLine.create(
-                new ProductId(OrderValidTestData.Product.ID),
+                OrderValidTestData.Product.PRODUCT_ID,
                 OrderValidTestData.Product.NAME,
-                new Money(new BigDecimal("249.90"), TRY),
+                OrderValidTestData.Product.UNIT_PRICE_MONEY,
                 new Quantity(2)
         );
 
@@ -47,9 +46,7 @@ class OrderLineTest {
     @DisplayName("Ürün adı boş olan satır oluşturulamaz")
     void givenBlankProductName_whenCreate_thenRejected() {
         // When / Then
-        assertThatThrownBy(() -> OrderLine.create(
-                new ProductId(OrderValidTestData.Product.ID), "  ",
-                new Money(BigDecimal.TEN, TRY), new Quantity(1)))
+        assertThatThrownBy(() -> new OrderLineBuilder().withValidValues().withProductName("  ").build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.PRODUCT_NAME_REQUIRED));
     }
@@ -61,9 +58,7 @@ class OrderLineTest {
         final String name = "x".repeat(OrderLine.MAX_PRODUCT_NAME_LENGTH + 1);
 
         // When / Then
-        assertThatThrownBy(() -> OrderLine.create(
-                new ProductId(OrderValidTestData.Product.ID), name,
-                new Money(BigDecimal.TEN, TRY), new Quantity(1)))
+        assertThatThrownBy(() -> new OrderLineBuilder().withValidValues().withProductName(name).build())
                 .isInstanceOfSatisfying(DomainValidationException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(OrderErrorCode.PRODUCT_NAME_TOO_LONG));
     }

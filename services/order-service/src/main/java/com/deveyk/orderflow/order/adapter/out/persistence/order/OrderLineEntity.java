@@ -47,8 +47,13 @@ class OrderLineEntity {
     private int quantity;
 
     @Builder
-    private OrderLineEntity(final UUID id, final OrderEntity order, final int lineNo, final UUID productId,
-                            final String productName, final BigDecimal unitPrice, final String currency,
+    private OrderLineEntity(final UUID id,
+                            final OrderEntity order,
+                            final int lineNo,
+                            final UUID productId,
+                            final String productName,
+                            final BigDecimal unitPrice,
+                            final String currency,
                             final int quantity) {
         this.id = id;
         this.order = order;

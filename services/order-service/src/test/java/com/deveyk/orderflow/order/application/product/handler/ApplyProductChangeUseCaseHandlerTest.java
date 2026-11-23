@@ -2,11 +2,11 @@ package com.deveyk.orderflow.order.application.product.handler;
 
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotSavePort;
-import com.deveyk.orderflow.order.application.product.usecase.ApplyProductChangeUseCase;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
+import com.deveyk.orderflow.order.testsupport.builder.ApplyProductChangeUseCaseBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.ProductSnapshotBuilder;
 import com.deveyk.orderflow.shared.testsupport.OrderflowUnitTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +24,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ApplyProductChangeUseCaseHandlerTest extends OrderflowUnitTest {
 
-    private static final ProductId PRODUCT_ID = new ProductId(OrderValidTestData.Product.ID);
+    private static final ProductId PRODUCT_ID = OrderValidTestData.Product.PRODUCT_ID;
+    private static final String NEW_NAME = "Wireless Headphones Pro";
     private static final Money NEW_PRICE = new Money(new BigDecimal("279.90"), TRY);
 
     @Mock
     private ProductSnapshotReadPort productSnapshotReadPort;
+
     @Mock
     private ProductSnapshotSavePort productSnapshotSavePort;
+
     private ApplyProductChangeUseCaseHandler handler;
 
     @BeforeEach
@@ -45,13 +48,18 @@ class ApplyProductChangeUseCaseHandlerTest extends OrderflowUnitTest {
         Mockito.when(productSnapshotReadPort.findById(PRODUCT_ID)).thenReturn(Optional.empty());
 
         // When
-        handler.handle(new ApplyProductChangeUseCase(PRODUCT_ID, "Wireless Headphones Pro", NEW_PRICE, 1L));
+        handler.handle(new ApplyProductChangeUseCaseBuilder()
+                .withValidValues()
+                .withName(NEW_NAME)
+                .withUnitPrice(NEW_PRICE)
+                .withProductVersion(1L)
+                .build());
 
         // Then
         final ArgumentCaptor<ProductSnapshot> created = ArgumentCaptor.forClass(ProductSnapshot.class);
         Mockito.verify(productSnapshotSavePort).create(created.capture());
         assertThat(created.getValue().getId()).isEqualTo(PRODUCT_ID);
-        assertThat(created.getValue().getName()).isEqualTo("Wireless Headphones Pro");
+        assertThat(created.getValue().getName()).isEqualTo(NEW_NAME);
         assertThat(created.getValue().getUnitPrice()).isEqualTo(NEW_PRICE);
         assertThat(created.getValue().getProductVersion()).isEqualTo(1L);
     }
@@ -64,8 +72,12 @@ class ApplyProductChangeUseCaseHandlerTest extends OrderflowUnitTest {
         Mockito.when(productSnapshotReadPort.findById(PRODUCT_ID)).thenReturn(Optional.of(existing));
 
         // When
-        final ProductSnapshot result = handler.handle(
-                new ApplyProductChangeUseCase(PRODUCT_ID, "Wireless Headphones Pro", NEW_PRICE, 2L));
+        final ProductSnapshot result = handler.handle(new ApplyProductChangeUseCaseBuilder()
+                .withValidValues()
+                .withName(NEW_NAME)
+                .withUnitPrice(NEW_PRICE)
+                .withProductVersion(2L)
+                .build());
 
         // Then
         Mockito.verify(productSnapshotSavePort).update(existing);
@@ -81,8 +93,12 @@ class ApplyProductChangeUseCaseHandlerTest extends OrderflowUnitTest {
         Mockito.when(productSnapshotReadPort.findById(PRODUCT_ID)).thenReturn(Optional.of(existing));
 
         // When
-        final ProductSnapshot result = handler.handle(
-                new ApplyProductChangeUseCase(PRODUCT_ID, "Wireless Headphones Pro", NEW_PRICE, 2L));
+        final ProductSnapshot result = handler.handle(new ApplyProductChangeUseCaseBuilder()
+                .withValidValues()
+                .withName(NEW_NAME)
+                .withUnitPrice(NEW_PRICE)
+                .withProductVersion(2L)
+                .build());
 
         // Then
         Mockito.verifyNoInteractions(productSnapshotSavePort);

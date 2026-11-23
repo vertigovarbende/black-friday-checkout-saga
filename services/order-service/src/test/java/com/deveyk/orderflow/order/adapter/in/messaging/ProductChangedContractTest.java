@@ -1,8 +1,7 @@
 package com.deveyk.orderflow.order.adapter.in.messaging;
 
 import com.deveyk.orderflow.order.application.product.usecase.ApplyProductChangeUseCase;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
 import com.deveyk.orderflow.shared.messaging.EventSourceNames;
@@ -39,7 +38,7 @@ class ProductChangedContractTest {
         assertThat(event.metadata().source()).isEqualTo(EventSourceNames.PRODUCT_SERVICE);
         assertThat(event.metadata().aggregateId()).isEqualTo(OrderValidTestData.Product.ID.toString());
 
-        assertThat(useCase.productId()).isEqualTo(new ProductId(OrderValidTestData.Product.ID));
+        assertThat(useCase.productId()).isEqualTo(OrderValidTestData.Product.PRODUCT_ID);
         assertThat(useCase.name()).isEqualTo("Wireless Headphones Pro");
         assertThat(useCase.unitPrice()).isEqualTo(new Money(new BigDecimal("279.90"), TRY));
         assertThat(useCase.productVersion()).isEqualTo(3L);

@@ -1,6 +1,7 @@
 package com.deveyk.orderflow.shared.architecture;
 
 import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
@@ -14,6 +15,8 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.GeneralCodingRules;
 
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
@@ -41,6 +44,9 @@ public final class OrderflowArchitectureRules {
     private static final String SHARED = "com.deveyk.orderflow.shared..";
     private static final String SHARED_DOMAIN = "com.deveyk.orderflow.shared.domain..";
     private static final String SHARED_APPLICATION = "com.deveyk.orderflow.shared.application..";
+    // Shared modülün iç package'ları: com.deveyk.orderflow.shared.<modül>.(adapter|jpa|cleanup)…; grup 1 modülün kökü
+    private static final Pattern SHARED_MODULE_INTERNAL =
+            Pattern.compile("(com\\.deveyk\\.orderflow\\.shared\\.[^.]+)\\.(adapter|jpa|cleanup)(\\..*)?");
 
     // Shared tipler (isimle)
     private static final String ENTITY = "com.deveyk.orderflow.shared.domain.Entity";
@@ -245,6 +251,15 @@ public final class OrderflowArchitectureRules {
                 .should().dependOnClassesThat().haveNameMatching("org\\.slf4j\\.MDC(\\$.*)?")
                 .because("MDC'yi sadece sınırlar yazar: filtre, inbox, zamanlanmış görevler (kural 22)")
                 .allowEmptyShould(true);
+
+        // 23. Shared modüllerin adapter, jpa ve cleanup package'larına sadece aynı modül erişebilir. Bu sınıflar public'tir
+        //     (config onları kurar), garantiyi derleyici değil bu kural verir. Servis shared-inbox'ı InboxProcessor,
+        //     shared-outbox'ı OutboxEventPort üzerinden kullanır.
+        @ArchTest
+        public static final ArchRule SHARED_MODULE_INTERNALS_ARE_USED_ONLY_INSIDE_THEIR_MODULE = classes()
+                .should(notDependOnInternalsOfAnotherSharedModule())
+                .because("shared modüllerin adapter, jpa ve cleanup package'ları modülün içidir; dışarıya config, port ve support açılır (kural 23)")
+                .allowEmptyShould(true);
     }
 
     public static final class TestCode {
@@ -327,6 +342,25 @@ public final class OrderflowArchitectureRules {
                                     "%s catches %s in %s",
                                     codeUnit.getFullName(), caught.getSimpleName(), block.getSourceCodeLocation())));
                         }
+                    }
+                }
+            }
+        };
+    }
+
+    private static ArchCondition<JavaClass> notDependOnInternalsOfAnotherSharedModule() {
+        return new ArchCondition<>("not depend on adapter, jpa or cleanup classes of another shared module") {
+            @Override
+            public void check(final JavaClass javaClass, final ConditionEvents events) {
+                for (final Dependency dependency : javaClass.getDirectDependenciesFromSelf()) {
+                    final Matcher matcher = SHARED_MODULE_INTERNAL.matcher(dependency.getTargetClass().getPackageName());
+                    if (!matcher.matches()) {
+                        continue;
+                    }
+                    final String moduleRoot = matcher.group(1);
+                    final String origin = javaClass.getPackageName();
+                    if (!origin.equals(moduleRoot) && !origin.startsWith(moduleRoot + ".")) {
+                        events.add(SimpleConditionEvent.violated(dependency, dependency.getDescription()));
                     }
                 }
             }

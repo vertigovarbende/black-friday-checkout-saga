@@ -1,7 +1,7 @@
 package com.deveyk.orderflow.order.domain.product.model;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.product.exception.ProductSnapshotErrorCode;
 import com.deveyk.orderflow.shared.domain.AggregateRoot;
 import com.deveyk.orderflow.shared.domain.exception.DomainValidationException;

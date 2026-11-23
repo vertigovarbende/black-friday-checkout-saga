@@ -1,9 +1,9 @@
 package com.deveyk.orderflow.order.adapter.in.messaging;
 
 import com.deveyk.orderflow.order.application.product.usecase.ApplyProductChangeUseCase;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
+import com.deveyk.orderflow.order.testsupport.builder.ApplyProductChangeUseCaseBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.ProductChangedEventBuilder;
 import com.deveyk.orderflow.shared.domain.exception.DomainValidationException;
 import com.deveyk.orderflow.shared.domain.exception.SharedErrorCode;
@@ -38,10 +38,11 @@ class ProductChangedPayloadToUseCaseMapperTest {
         final ApplyProductChangeUseCase useCase = ProductChangedPayloadToUseCaseMapper.toUseCase(payload);
 
         // Then
-        assertThat(useCase.productId()).isEqualTo(new ProductId(productId));
-        assertThat(useCase.name()).isEqualTo(OrderValidTestData.Product.NAME);
-        assertThat(useCase.unitPrice()).isEqualTo(new Money(OrderValidTestData.Product.UNIT_PRICE, TRY));
-        assertThat(useCase.productVersion()).isEqualTo(4L);
+        assertThat(useCase).isEqualTo(new ApplyProductChangeUseCaseBuilder()
+                .withValidValues()
+                .withProductId(new ProductId(productId))
+                .withProductVersion(4L)
+                .build());
     }
 
     @Test

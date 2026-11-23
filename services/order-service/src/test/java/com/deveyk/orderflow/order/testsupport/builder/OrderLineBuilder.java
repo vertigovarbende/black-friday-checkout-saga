@@ -1,8 +1,8 @@
 package com.deveyk.orderflow.order.testsupport.builder;
 
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.order.domain.order.model.OrderLineId;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
@@ -20,10 +20,18 @@ public class OrderLineBuilder implements TestDataBuilder<OrderLine> {
 
     public OrderLineBuilder withValidValues() {
         this.id = OrderLineId.newId();
-        this.productId = new ProductId(OrderValidTestData.Product.ID);
+        this.productId = OrderValidTestData.Product.PRODUCT_ID;
         this.productName = OrderValidTestData.Product.NAME;
-        this.unitPrice = new Money(OrderValidTestData.Product.UNIT_PRICE, OrderValidTestData.TRY);
+        this.unitPrice = OrderValidTestData.Product.UNIT_PRICE_MONEY;
         this.quantity = new Quantity(1);
+        return this;
+    }
+
+    // Seed'deki ikinci ürün (USB-C Cable): kimliği, adı ve fiyatı birlikte
+    public OrderLineBuilder withSecondProduct() {
+        this.productId = OrderValidTestData.SecondProduct.PRODUCT_ID;
+        this.productName = OrderValidTestData.SecondProduct.NAME;
+        this.unitPrice = OrderValidTestData.SecondProduct.UNIT_PRICE_MONEY;
         return this;
     }
 
@@ -32,8 +40,18 @@ public class OrderLineBuilder implements TestDataBuilder<OrderLine> {
         return this;
     }
 
+    public OrderLineBuilder withId(final OrderLineId id) {
+        this.id = id;
+        return this;
+    }
+
     public OrderLineBuilder withProductId(final ProductId productId) {
         this.productId = productId;
+        return this;
+    }
+
+    public OrderLineBuilder withProductName(final String productName) {
+        this.productName = productName;
         return this;
     }
 

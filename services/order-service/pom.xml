@@ -56,10 +56,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-        </dependency>
         <!-- Gözlem (08 §15): health + /actuator/prometheus, Micrometer Tracing + OpenTelemetry + OTLP export -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

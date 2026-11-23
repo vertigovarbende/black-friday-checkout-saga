@@ -25,8 +25,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Teslim garantisi senaryoları 2 ve 6 (07 §9.3): işlenemeyen mesaj retry'sız <topic>.<group>.DLT'ye gider;
-// iş, inbox kaydıyla birlikte geri alınır. Geri alınan mesajın yeniden gelince işlenmesi InboxProcessorIT'de.
 class DeadLetterDeliveryIT extends OrderDeliveryTestConfiguration {
 
     private static final String CONSUMER = "order-service.product-changed";
@@ -44,11 +42,13 @@ class DeadLetterDeliveryIT extends OrderDeliveryTestConfiguration {
     void givenBlankProductName_whenConsumed_thenDeadLetteredWithoutRetryAndRolledBack() {
         // Given
         final UUID productId = UUID.randomUUID();
+
         final OrderflowEvent<ProductChangedPayload> event = new ProductChangedEventBuilder()
                 .withValidValues()
                 .withProductId(productId)
                 .withName(" ")
                 .build();
+
         final double deadLettersBefore = deadLetters("ORD_202");
 
         try (MessageProbe probe = messageProbe(DEAD_LETTER_TOPIC)) {
@@ -104,15 +104,18 @@ class DeadLetterDeliveryIT extends OrderDeliveryTestConfiguration {
 
     // Recoverer önce DLT'ye yazar, sonra loglar ve sayar: sayaç artınca log da yazılmıştır.
     private void awaitDeadLetterCounted(final String code, final double before) {
+
         Awaitility.await("DLT counter for %s".formatted(code))
                 .atMost(Duration.ofSeconds(10))
                 .until(() -> deadLetters(code) - before, counted -> counted == 1.0);
     }
 
     private double deadLetters(final String code) {
+
         final Counter counter = meterRegistry.find(DLT_COUNTER)
                 .tags("topic", TopicNames.PRODUCT_CHANGED, "code", code)
                 .counter();
+
         return counter == null ? 0.0 : counter.count();
     }
 }

@@ -1,7 +1,7 @@
 package com.deveyk.orderflow.order.application.order.usecase;
 
-import com.deveyk.orderflow.order.domain.common.ProductId;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderErrorCode;
 import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.shared.application.UseCase;

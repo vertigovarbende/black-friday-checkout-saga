@@ -1,6 +1,6 @@
 package com.deveyk.orderflow.order.adapter.out.messaging;
 
-import com.deveyk.orderflow.order.domain.common.Money;
+import com.deveyk.orderflow.order.domain.common.model.Money;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.shared.messaging.contract.MoneyAmount;

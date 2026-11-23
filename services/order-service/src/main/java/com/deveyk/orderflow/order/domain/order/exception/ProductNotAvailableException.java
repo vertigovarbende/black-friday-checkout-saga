@@ -1,6 +1,6 @@
 package com.deveyk.orderflow.order.domain.order.exception;
 
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.shared.domain.exception.OrderflowBusinessRuleException;
 
 import java.io.Serial;

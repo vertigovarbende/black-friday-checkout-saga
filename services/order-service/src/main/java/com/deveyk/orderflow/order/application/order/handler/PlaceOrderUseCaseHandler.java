@@ -4,7 +4,7 @@ import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.application.order.port.OrderSavePort;
 import com.deveyk.orderflow.order.application.order.usecase.PlaceOrderUseCase;
 import com.deveyk.orderflow.order.application.product.port.ProductSnapshotReadPort;
-import com.deveyk.orderflow.order.domain.common.ProductId;
+import com.deveyk.orderflow.order.domain.common.model.ProductId;
 import com.deveyk.orderflow.order.domain.order.exception.ProductNotAvailableException;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;

@@ -2,16 +2,14 @@ package com.deveyk.orderflow.order.testsupport.contract;
 
 import com.deveyk.orderflow.order.application.order.port.OrderReadPort;
 import com.deveyk.orderflow.order.application.order.port.OrderSavePort;
-import com.deveyk.orderflow.order.domain.common.Money;
-import com.deveyk.orderflow.order.domain.common.Quantity;
+import com.deveyk.orderflow.order.domain.common.model.Money;
+import com.deveyk.orderflow.order.domain.common.model.Quantity;
 import com.deveyk.orderflow.order.domain.order.exception.OrderNotFoundException;
 import com.deveyk.orderflow.order.domain.order.model.CancellationReason;
-import com.deveyk.orderflow.order.domain.order.model.CustomerId;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.domain.order.model.OrderLine;
 import com.deveyk.orderflow.order.domain.order.model.OrderStatus;
-import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.OrderLineBuilder;
 import org.junit.jupiter.api.DisplayName;
@@ -53,17 +51,18 @@ public interface OrderPortContract {
         // Given
         final OrderLine first = new OrderLineBuilder()
                 .withValidValues()
-                .withUnitPrice(new Money(new BigDecimal("249.90"), TRY))
                 .withQuantity(new Quantity(2))
                 .build();
 
         final OrderLine second = new OrderLineBuilder()
                 .withValidValues()
-                .withRandomProduct()
-                .withUnitPrice(new Money(new BigDecimal("15.00"), TRY))
+                .withSecondProduct()
                 .build();
 
-        final Order order = Order.place(new CustomerId(OrderValidTestData.Customer.ID), List.of(first, second), NOW);
+        final Order order = new OrderBuilder()
+                .withValidValues()
+                .withLines(List.of(first, second))
+                .build();
 
         // When
         inTransaction(() -> savePort().create(order));
