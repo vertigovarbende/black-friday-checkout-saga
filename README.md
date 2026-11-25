@@ -8,7 +8,9 @@ Kullanıcı sipariş verir, stok ayrılır, ödeme alınır ve sipariş tamamlan
 
 ## Mimari bir bakışta
 
-[`docs/diagrams/blackfriday.excalidraw`](docs/diagrams/blackfriday.excalidraw) (excalidraw.com → Open).
+![Black Friday: servisler, Kafka, Postgres, Redis ve checkout saga](docs/diagrams/blackfriday.png)
+
+Kaynağı: [`docs/diagrams/blackfriday.excalidraw`](docs/diagrams/blackfriday.excalidraw) (excalidraw.com → Open).
 
 | Servis | Sahip olduğu veri | Görevi |
 |---|---|---|
