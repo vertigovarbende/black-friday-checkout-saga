@@ -17,6 +17,22 @@ spring:
     consumer:
       group-id: kafka-basics
       auto-offset-reset: earliest
+  # Deney 6 (dual write): doğrudan yolun DB'si; tablo schema.sql ile açılır.
+  datasource:
+    url: jdbc:postgresql://localhost:5432/experiments
+    username: experiments
+    password: experiments
+  sql:
+    init:
+      mode: always
+
+experiments:
+  dualwrite:
+    # Outbox yolunun kontrolü order-service'in DB'sini okur (sadece SELECT).
+    outbox-db:
+      url: jdbc:postgresql://localhost:5432/order_service
+      username: order_service
+      password: order_service
 
 logging:
   level:

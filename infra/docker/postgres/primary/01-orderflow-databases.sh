@@ -20,3 +20,10 @@ REVOKE CONNECT ON DATABASE ${database} FROM PUBLIC;
 GRANT CONNECT ON DATABASE ${database} TO debezium;
 SQL
 done
+
+# experiments/kafka-basics'in DB'si (deney 6, dual write). Debezium okumaz.
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres <<SQL
+CREATE ROLE experiments WITH LOGIN PASSWORD 'experiments';
+CREATE DATABASE experiments OWNER experiments;
+REVOKE CONNECT ON DATABASE experiments FROM PUBLIC;
+SQL
