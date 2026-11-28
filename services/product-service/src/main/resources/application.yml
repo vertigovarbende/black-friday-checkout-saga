@@ -3,4 +3,4 @@ spring:
     name: product-service
 
 server:
-  port: 8083
+  port: 8082   # 8083 Kafka Connect'te
