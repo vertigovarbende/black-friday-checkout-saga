@@ -21,6 +21,12 @@ public final class OrderflowMockMvcRequestBuilders {
                 .accept(MediaType.APPLICATION_JSON);
     }
 
+    // Header'sız istek: X-User-Id istemeyen endpoint'ler (product-service admin API'si) ve header kontrollerinin testleri için.
+    public static MockHttpServletRequestBuilder get(final String endpoint) {
+        return MockMvcRequestBuilders.get(endpoint)
+                .accept(MediaType.APPLICATION_JSON);
+    }
+
     public static MockHttpServletRequestBuilder post(final String endpoint, final UUID userId, final Object body) {
         return post(endpoint, body)
                 .header(OrderflowHeaders.USER_ID, userId.toString());
@@ -29,6 +35,13 @@ public final class OrderflowMockMvcRequestBuilders {
     // Header'sız ya da elle verilen header'la istek; header kontrollerinin testleri için.
     public static MockHttpServletRequestBuilder post(final String endpoint, final Object body) {
         return MockMvcRequestBuilders.post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(JSON_MAPPER.writeValueAsString(body));
+    }
+
+    public static MockHttpServletRequestBuilder patch(final String endpoint, final Object body) {
+        return MockMvcRequestBuilders.patch(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(JSON_MAPPER.writeValueAsString(body));

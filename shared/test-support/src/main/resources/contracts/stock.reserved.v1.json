@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "eventId": "0198a1b2-0000-7000-8000-00000000e201",
+    "eventType": "StockReserved",
+    "aggregateType": "stock",
+    "aggregateId": "0198a1b2-0000-7000-8000-00000000a001",
+    "source": "product-service",
+    "version": "1",
+    "occurredAt": "2026-11-27T10:00:00Z",
+    "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "correlationId": "black-friday-checkout-1"
+  },
+  "payload": {
+    "orderId": "0198a1b2-0000-7000-8000-00000000a001",
+    "reservedAt": "2026-11-27T10:00:00Z"
+  }
+}

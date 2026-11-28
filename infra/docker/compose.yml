@@ -256,8 +256,8 @@ services:
       - "3000:3000"
 
   # ------------------------------------------------------------------ apps
-  # Jar host'ta üretilir: mvn -pl services/order-service -am package -DskipTests
-  # IDE'den aynı servisi çalıştırırken bunu açma: ikisi de 8081'i kullanır.
+  # Jar'lar host'ta üretilir: mvn -pl services/order-service,services/product-service -am package -DskipTests
+  # IDE'den aynı servisi çalıştırırken onu burada açma: ikisi de aynı portu kullanır (8081, 8082).
 
   order-service:
     build:
@@ -285,6 +285,32 @@ services:
       orderflow.logs: "true"
     ports:
       - "8081:8081"
+
+  product-service:
+    build:
+      context: ../../services/product-service
+    image: orderflow/product-service:local
+    profiles: [apps]
+    restart: unless-stopped
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+      postgres-replica:
+        condition: service_healthy
+      # product.changed ve stock.* topic'lerini açılışta servis açar; Debezium'dan önce var olmalı.
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: compose
+    mem_limit: 768m
+    labels:
+      orderflow.logs: "true"
+    ports:
+      - "8082:8082"
 
 volumes:
   postgres-primary-data:
