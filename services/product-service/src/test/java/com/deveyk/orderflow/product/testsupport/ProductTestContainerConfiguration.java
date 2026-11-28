@@ -2,7 +2,9 @@ package com.deveyk.orderflow.product.testsupport;
 
 import com.deveyk.orderflow.shared.testsupport.LogTrackerConfiguration;
 import com.deveyk.orderflow.shared.testsupport.container.OrderflowContainers;
+import com.deveyk.orderflow.shared.testsupport.messaging.MessagePublisher;
 import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvc;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
@@ -15,13 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureTracing
-@Import(ProductDatabaseCleaner.class)
+@Import({ProductDatabaseCleaner.class, ProductTestTopicConfiguration.class})
 public abstract class ProductTestContainerConfiguration extends LogTrackerConfiguration {
 
     protected static final PostgreSQLContainer POSTGRES = OrderflowContainers.postgres("product_service");
@@ -52,6 +55,8 @@ public abstract class ProductTestContainerConfiguration extends LogTrackerConfig
 
     protected OrderflowMockMvc orderflowMockMvc;
 
+    protected MessagePublisher messagePublisher;
+
     @BeforeEach
     void cleanDatabase() {
         databaseCleaner.clean();
@@ -60,5 +65,15 @@ public abstract class ProductTestContainerConfiguration extends LogTrackerConfig
     @BeforeEach
     void setUpOrderflowMockMvc(@Autowired final MockMvc mockMvc) {
         orderflowMockMvc = new OrderflowMockMvc(mockMvc);
+    }
+
+    @BeforeEach
+    void setUpMessagePublisher(@Autowired final JsonMapper jsonMapper) {
+        messagePublisher = MessagePublisher.on(KAFKA.getBootstrapServers(), jsonMapper);
+    }
+
+    @AfterEach
+    void closeMessagePublisher() {
+        messagePublisher.close();
     }
 }

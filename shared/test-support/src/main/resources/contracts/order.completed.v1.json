@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "eventId": "0198a1b2-0000-7000-8000-00000000e002",
+    "eventType": "OrderCompleted",
+    "aggregateType": "order",
+    "aggregateId": "0198a1b2-0000-7000-8000-00000000a001",
+    "source": "order-service",
+    "version": "1",
+    "occurredAt": "2026-11-27T10:10:00Z",
+    "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "correlationId": "black-friday-checkout-1"
+  },
+  "payload": {
+    "orderId": "0198a1b2-0000-7000-8000-00000000a001",
+    "customerId": "0198a1b2-0000-7000-8000-000000000001",
+    "totalAmount": {
+      "amount": "514.80",
+      "currency": "TRY"
+    },
+    "completedAt": "2026-11-27T10:10:00Z"
+  }
+}
