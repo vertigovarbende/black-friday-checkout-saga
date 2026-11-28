@@ -27,6 +27,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+        <!-- Handler'lardaki @Transactional. 3b'de spring-boot-starter-data-jpa ile gelir, bu satır kalkar. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
         <!-- Sadece derleme zamanı; jar'a girmez -->
         <dependency>
             <groupId>org.projectlombok</groupId>

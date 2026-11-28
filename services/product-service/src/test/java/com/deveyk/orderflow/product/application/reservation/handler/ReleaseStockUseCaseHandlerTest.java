@@ -1,0 +1,131 @@
+package com.deveyk.orderflow.product.application.reservation.handler;
+
+import com.deveyk.orderflow.product.application.product.port.ProductReadPort;
+import com.deveyk.orderflow.product.application.product.port.ProductSavePort;
+import com.deveyk.orderflow.product.application.reservation.port.StockReservationReadPort;
+import com.deveyk.orderflow.product.application.reservation.port.StockReservationSavePort;
+import com.deveyk.orderflow.product.application.reservation.port.StockSagaEventPort;
+import com.deveyk.orderflow.product.application.reservation.usecase.ReleaseStockUseCase;
+import com.deveyk.orderflow.product.domain.common.model.ProductId;
+import com.deveyk.orderflow.product.domain.common.model.Quantity;
+import com.deveyk.orderflow.product.domain.product.model.Product;
+import com.deveyk.orderflow.product.domain.reservation.exception.InvalidReservationStateException;
+import com.deveyk.orderflow.product.domain.reservation.model.OrderId;
+import com.deveyk.orderflow.product.domain.reservation.model.ReservationStatus;
+import com.deveyk.orderflow.product.domain.reservation.model.StockReservation;
+import com.deveyk.orderflow.product.testsupport.ProductValidTestData;
+import com.deveyk.orderflow.product.testsupport.builder.ProductBuilder;
+import com.deveyk.orderflow.product.testsupport.builder.StockReservationBuilder;
+import com.deveyk.orderflow.shared.testsupport.OrderflowUnitTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
+import java.time.Clock;
+import java.time.ZoneOffset;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class ReleaseStockUseCaseHandlerTest extends OrderflowUnitTest {
+
+    private static final OrderId ORDER_ID = ProductValidTestData.Order.ORDER_ID;
+    private static final ProductId PRODUCT_ID = ProductValidTestData.Product.PRODUCT_ID;
+    private static final ReleaseStockUseCase USE_CASE = new ReleaseStockUseCase(ORDER_ID);
+
+    @Mock
+    private StockReservationReadPort stockReservationReadPort;
+
+    @Mock
+    private StockReservationSavePort stockReservationSavePort;
+
+    @Mock
+    private ProductReadPort productReadPort;
+
+    @Mock
+    private ProductSavePort productSavePort;
+
+    @Mock
+    private StockSagaEventPort stockSagaEventPort;
+
+    private ReleaseStockUseCaseHandler handler;
+
+    @BeforeEach
+    void setUpHandler() {
+        handler = new ReleaseStockUseCaseHandler(stockReservationReadPort, stockReservationSavePort, productReadPort,
+                productSavePort, stockSagaEventPort, Clock.fixed(ProductValidTestData.LATER, ZoneOffset.UTC));
+    }
+
+    @Test
+    @DisplayName("RESERVED rezervasyon release edilir, stok geri döner ve stock.released yayınlanır")
+    void givenReserved_whenHandle_thenReleasedSavedAndReplied() {
+        // Given
+        final Product product = new ProductBuilder().withValidValues().withOnHand(10).withReserved(2).build();
+        final StockReservation reservation = new StockReservationBuilder().withValidValues().build();
+        Mockito.when(stockReservationReadPort.findById(ORDER_ID)).thenReturn(Optional.of(reservation));
+        Mockito.when(productReadPort.findAllByIdsAsMap(Set.of(PRODUCT_ID))).thenReturn(Map.of(PRODUCT_ID, product));
+
+        // When
+        handler.handle(USE_CASE);
+
+        // Then
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RELEASED);
+        assertThat(product.getReserved()).isEqualTo(Quantity.ZERO);
+        Mockito.verify(stockReservationSavePort).update(reservation);
+        Mockito.verify(productSavePort).update(product);
+        Mockito.verify(stockSagaEventPort).publishStockReleased(reservation);
+    }
+
+    @Test
+    @DisplayName("Rezervasyon yoksa (release reserve'den önce geldi) kapanış kaydı oluşturulur ve stock.released yayınlanır")
+    void givenNoReservation_whenHandle_thenClosingRecordCreatedAndReplied() {
+        // Given
+        Mockito.when(stockReservationReadPort.findById(ORDER_ID)).thenReturn(Optional.empty());
+
+        // When
+        handler.handle(USE_CASE);
+
+        // Then
+        final ArgumentCaptor<StockReservation> created = ArgumentCaptor.forClass(StockReservation.class);
+        Mockito.verify(stockReservationSavePort).create(created.capture());
+        assertThat(created.getValue().isClosingRecord()).isTrue();
+        assertThat(created.getValue().getStatus()).isEqualTo(ReservationStatus.RELEASED);
+        Mockito.verify(stockSagaEventPort).publishStockReleased(created.getValue());
+        Mockito.verifyNoInteractions(productReadPort, productSavePort);
+    }
+
+    @Test
+    @DisplayName("Zaten RELEASED ise hiçbir şey kaydedilmez, stock.released yeniden yayınlanır")
+    void givenReleased_whenHandle_thenReplyPublishedAgainWithoutChanges() {
+        // Given
+        final StockReservation reservation = new StockReservationBuilder().withValidValues().withStatus(ReservationStatus.RELEASED).build();
+        Mockito.when(stockReservationReadPort.findById(ORDER_ID)).thenReturn(Optional.of(reservation));
+        Mockito.when(productReadPort.findAllByIdsAsMap(Set.of(PRODUCT_ID))).thenReturn(Map.of());
+
+        // When
+        handler.handle(USE_CASE);
+
+        // Then
+        Mockito.verify(stockSagaEventPort).publishStockReleased(reservation);
+        Mockito.verifyNoInteractions(stockReservationSavePort, productSavePort);
+    }
+
+    @Test
+    @DisplayName("COMMITTED rezervasyon release edilemez: InvalidReservationStateException (DLT), cevap yayınlanmaz")
+    void givenCommitted_whenHandle_thenInvalidStateAndNoReply() {
+        // Given
+        final StockReservation reservation = new StockReservationBuilder().withValidValues().withStatus(ReservationStatus.COMMITTED).build();
+        Mockito.when(stockReservationReadPort.findById(ORDER_ID)).thenReturn(Optional.of(reservation));
+        Mockito.when(productReadPort.findAllByIdsAsMap(Set.of(PRODUCT_ID))).thenReturn(Map.of());
+
+        // When / Then
+        assertThatThrownBy(() -> handler.handle(USE_CASE)).isInstanceOf(InvalidReservationStateException.class);
+        Mockito.verifyNoInteractions(stockReservationSavePort, productSavePort, stockSagaEventPort);
+    }
+}
