@@ -41,6 +41,17 @@ public final class OutboxAssert {
         return rows.getFirst();
     }
 
+    // Aynı cevabın yeniden yayını gibi durumlar için: bu tipte tam count kadar event.
+    public List<OutboxRow> hasEvents(final String aggregateId, final String eventType, final int count) {
+        final List<OutboxRow> rows = rowsOf(aggregateId).stream()
+                .filter(row -> row.eventType().equals(eventType))
+                .toList();
+        assertThat(rows)
+                .as("outbox events of type %s for aggregate %s", eventType, aggregateId)
+                .hasSize(count);
+        return rows;
+    }
+
     public void hasNoEvent(final String aggregateId) {
         assertThat(rowsOf(aggregateId))
                 .as("outbox events for aggregate %s", aggregateId)

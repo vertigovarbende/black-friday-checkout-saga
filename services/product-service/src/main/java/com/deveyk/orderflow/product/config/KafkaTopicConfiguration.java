@@ -3,11 +3,12 @@ package com.deveyk.orderflow.product.config;
 import com.deveyk.orderflow.shared.kafka.KafkaTopicProperties;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// product-service'in ürettiği event'lerin topic'leri (event-catalog.md §4). Topic'i event'i üreten, DLT'yi tüketen servis
-// açar; tükettiği komutların DLT'leri listener'larla birlikte gelir (adım 3b-2).
+// Topic'i event'i üreten, DLT'yi tüketen servis açar (event-catalog.md §4): product-service'in ürettiği dört topic ve
+// tükettiği üç topic'in DLT'leri. Tükettiği topic'leri orchestrator (adım 5) ve order-service (adım 6) açar.
 @Configuration(proxyBeanMethods = false)
 public class KafkaTopicConfiguration {
 
@@ -29,5 +30,23 @@ public class KafkaTopicConfiguration {
     @Bean
     public NewTopic stockReleasedTopic(final KafkaTopicProperties properties) {
         return properties.newTopic(TopicNames.STOCK_RELEASED);
+    }
+
+    @Bean
+    public NewTopic stockReserveRequestedDeadLetterTopic(final KafkaTopicProperties properties,
+                                                         final KafkaProperties kafkaProperties) {
+        return properties.newTopic(TopicNames.deadLetter(TopicNames.STOCK_RESERVE_REQUESTED, kafkaProperties.getConsumer().getGroupId()));
+    }
+
+    @Bean
+    public NewTopic stockReleaseRequestedDeadLetterTopic(final KafkaTopicProperties properties,
+                                                         final KafkaProperties kafkaProperties) {
+        return properties.newTopic(TopicNames.deadLetter(TopicNames.STOCK_RELEASE_REQUESTED, kafkaProperties.getConsumer().getGroupId()));
+    }
+
+    @Bean
+    public NewTopic orderCompletedDeadLetterTopic(final KafkaTopicProperties properties,
+                                                  final KafkaProperties kafkaProperties) {
+        return properties.newTopic(TopicNames.deadLetter(TopicNames.ORDER_COMPLETED, kafkaProperties.getConsumer().getGroupId()));
     }
 }
