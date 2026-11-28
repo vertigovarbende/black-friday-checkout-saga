@@ -54,7 +54,7 @@ class DeadLetterDeliveryIT extends OrderDeliveryTestConfiguration {
         try (MessageProbe probe = messageProbe(DEAD_LETTER_TOPIC)) {
 
             // When
-            final RecordMetadata sent = publishEvent(TopicNames.PRODUCT_CHANGED, event);
+            final RecordMetadata sent = messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, event);
 
             // Then
             final ConsumerRecord<String, String> deadLetter = probe.awaitMessage(productId.toString());
@@ -84,19 +84,19 @@ class DeadLetterDeliveryIT extends OrderDeliveryTestConfiguration {
         // Given
         final String key = UUID.randomUUID().toString();
         final String poisonPill = "{not json";
-        final double deadLettersBefore = deadLetters("ORD_301");
+        final double deadLettersBefore = deadLetters("MSG_001");
 
         try (MessageProbe probe = messageProbe(DEAD_LETTER_TOPIC)) {
 
             // When
-            final RecordMetadata sent = publishRaw(TopicNames.PRODUCT_CHANGED, key, poisonPill);
+            final RecordMetadata sent = messagePublisher.publishRaw(TopicNames.PRODUCT_CHANGED, key, poisonPill);
 
             // Then
             final ConsumerRecord<String, String> deadLetter = probe.awaitMessage(key);
             assertThat(deadLetter.value()).isEqualTo(poisonPill);
             assertThat(deadLetter.partition()).isEqualTo(sent.partition());
 
-            awaitDeadLetterCounted("ORD_301", deadLettersBefore);
+            awaitDeadLetterCounted("MSG_001", deadLettersBefore);
             assertThat(logTracker.findMessage(Level.WARN, "partition=" + sent.partition() + " offset=" + sent.offset()
                     + " attempt=2")).as("retry yok").isEmpty();
         }

@@ -1,10 +1,10 @@
-package com.deveyk.orderflow.order.adapter.in.messaging;
+package com.deveyk.orderflow.shared.messaging.exception;
 
 import com.deveyk.orderflow.shared.domain.exception.OrderflowValidationException;
 
 import java.io.Serial;
 
-// Validation ailesinden: Kafka error handler retry yapmadan DLT'ye gönderir.
+// Gelen mesajın kendisindeki hata. Validation ailesinden: Kafka error handler retry yapmadan DLT'ye gönderir (06 §8).
 public final class InvalidEventException extends OrderflowValidationException {
 
     @Serial

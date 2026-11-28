@@ -50,8 +50,8 @@ class DuplicateMessageDeliveryIT extends OrderDeliveryTestConfiguration {
         final double duplicatesBefore = duplicates();
 
         // When
-        publishEvent(TopicNames.PRODUCT_CHANGED, event);
-        publishEvent(TopicNames.PRODUCT_CHANGED, event);
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, event);
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, event);
 
         // Then
         Awaitility.await("duplicate of event %s skipped".formatted(event.metadata().eventId()))

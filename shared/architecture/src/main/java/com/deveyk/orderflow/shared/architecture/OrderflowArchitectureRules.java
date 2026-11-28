@@ -220,13 +220,14 @@ public final class OrderflowArchitectureRules {
                 .because("her exception altı aileden birine aittir; HTTP ve retry davranışı aileden gelir (kural 14)")
                 .allowEmptyShould(true);
 
-        // 15. Somut exception'lar final'dır ve domain..exception ya da adapter altında durur.
+        // 15. Somut exception'lar final'dır ve domain..exception, adapter ya da bir shared modülün exception package'ı
+        // (shared.messaging.exception …) altında durur.
         @ArchTest
         public static final ArchRule CONCRETE_EXCEPTIONS_ARE_FINAL_AND_PLACED = classes()
                 .that().areAssignableTo(ORDERFLOW_EXCEPTION)
                 .and().doNotHaveModifier(JavaModifier.ABSTRACT)
                 .should().haveModifier(JavaModifier.FINAL)
-                .andShould().resideInAnyPackage("..domain..exception..", ADAPTER)
+                .andShould().resideInAnyPackage("..domain..exception..", ADAPTER, "com.deveyk.orderflow.shared.*.exception..")
                 .because("somut exception'lar genişletilmez ve sahibinin yanında durur (kural 15)")
                 .allowEmptyShould(true);
 

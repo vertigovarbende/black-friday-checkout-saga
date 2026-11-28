@@ -3,9 +3,9 @@ package com.deveyk.orderflow.order.adapter.in.messaging;
 import com.deveyk.orderflow.order.application.product.usecase.ApplyProductChangeUseCase;
 import com.deveyk.orderflow.order.domain.common.model.Money;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
-import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
+import com.deveyk.orderflow.shared.messaging.EventJsonReader;
 import com.deveyk.orderflow.shared.messaging.EventSourceNames;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.messaging.contract.product.ProductChangedPayload;
 import com.deveyk.orderflow.shared.testsupport.contract.GoldenJson;
@@ -33,8 +33,8 @@ class ProductChangedContractTest {
         final ApplyProductChangeUseCase useCase = ProductChangedPayloadToUseCaseMapper.toUseCase(event.payload());
 
         // Then
-        assertThat(event.metadata().eventType()).isEqualTo(EventTypeNames.PRODUCT_CHANGED);
-        assertThat(event.metadata().aggregateType()).isEqualTo(AggregateTypeNames.PRODUCT);
+        assertThat(event.metadata().eventType()).isEqualTo(EventDefinitions.PRODUCT_CHANGED.eventType());
+        assertThat(event.metadata().aggregateType()).isEqualTo(EventDefinitions.PRODUCT_CHANGED.aggregateType());
         assertThat(event.metadata().source()).isEqualTo(EventSourceNames.PRODUCT_SERVICE);
         assertThat(event.metadata().aggregateId()).isEqualTo(OrderValidTestData.Product.ID.toString());
 

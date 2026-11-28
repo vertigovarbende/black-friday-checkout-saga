@@ -1,23 +1,25 @@
-package com.deveyk.orderflow.order.adapter.in.messaging;
+package com.deveyk.orderflow.shared.messaging;
 
 import com.deveyk.orderflow.shared.messaging.contract.EventMetadata;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import com.deveyk.orderflow.shared.messaging.exception.InvalidEventException;
+import com.deveyk.orderflow.shared.messaging.exception.MessagingErrorCode;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.json.JsonMapper;
 
-// Kafka'dan gelen zarfı (OrderflowEvent<P>) okur. Okunamayan ya da kimliği eksik zarf InvalidEventException olur:
-// tekrar denemek sonucu değiştirmez. İkinci servis listener yazınca shared-messaging'e taşınır (01 §3.3 kural 2).
-@Component
-@RequiredArgsConstructor
-class EventJsonReader {
+// Gelen zarfı (OrderflowEvent<P>) JSON'dan okur. Okunamayan ya da kimliği eksik zarf InvalidEventException olur:
+// tekrar denemek sonucu değiştirmez. Kafka'ya bağlı değildir; Redis'ten okunan zarf da aynı yoldan geçer.
+public class EventJsonReader {
 
     private final JsonMapper jsonMapper;
 
-    <P> OrderflowEvent<P> read(final String json, final Class<P> payloadType) {
+    public EventJsonReader(final JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
+    }
+
+    public <P> OrderflowEvent<P> read(final String json, final Class<P> payloadType) {
 
         if (json == null || json.isBlank()) {
             throw new InvalidEventException(MessagingErrorCode.UNREADABLE_EVENT, "empty message");

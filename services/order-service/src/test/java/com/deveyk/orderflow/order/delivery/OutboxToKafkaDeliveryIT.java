@@ -7,7 +7,7 @@ import com.deveyk.orderflow.order.testsupport.OrderDeliveryTestConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderRequestBuilder;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.observability.OrderflowHeaders;
 import com.deveyk.orderflow.shared.testsupport.messaging.MessageProbe;
@@ -63,16 +63,16 @@ class OutboxToKafkaDeliveryIT extends OrderDeliveryTestConfiguration {
 
             // Then
             final ConsumerRecord<String, String> message = probe.awaitMessage(orderId);
-            final OutboxAssert.OutboxRow row = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventTypeNames.ORDER_CREATED);
+            final OutboxAssert.OutboxRow row = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventDefinitions.ORDER_CREATED.eventType());
 
             assertThat(message.key()).isEqualTo(orderId);
             assertThat(MessageProbe.header(message, "id")).isEqualTo(row.id().toString());
-            assertThat(MessageProbe.header(message, "eventType")).isEqualTo(EventTypeNames.ORDER_CREATED);
+            assertThat(MessageProbe.header(message, "eventType")).isEqualTo(EventDefinitions.ORDER_CREATED.eventType());
             assertThat(MessageProbe.header(message, "traceparent"))
                     .isEqualTo(row.traceparent())
                     .startsWith("00-" + traceId + "-");
             assertThat(JsonPath.<String>read(message.value(), "$.metadata.eventId")).isEqualTo(row.id().toString());
-            assertThat(JsonPath.<String>read(message.value(), "$.metadata.eventType")).isEqualTo(EventTypeNames.ORDER_CREATED);
+            assertThat(JsonPath.<String>read(message.value(), "$.metadata.eventType")).isEqualTo(EventDefinitions.ORDER_CREATED.eventType());
             assertThat(JsonPath.<String>read(message.value(), "$.payload.orderId")).isEqualTo(orderId);
         }
     }

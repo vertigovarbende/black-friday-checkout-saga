@@ -5,6 +5,7 @@ import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.shared.application.UseCaseHandler;
 import com.deveyk.orderflow.shared.inbox.port.InboxMessage;
 import com.deveyk.orderflow.shared.inbox.support.InboxProcessor;
+import com.deveyk.orderflow.shared.messaging.EventJsonReader;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.messaging.contract.product.ProductChangedPayload;
@@ -12,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-// Ürün kopyasını product.changed ile günceller. Hata yakalanmaz; retry ve DLT Kafka error handler'ındadır
-// (KafkaErrorHandlingConfiguration).
 @Component
 @RequiredArgsConstructor
 class ProductChangedKafkaListener {
@@ -24,7 +23,6 @@ class ProductChangedKafkaListener {
     private final InboxProcessor inboxProcessor;
     private final UseCaseHandler<ProductSnapshot, ApplyProductChangeUseCase> applyProductChangeUseCaseHandler;
 
-    // idIsGroup = false: id sadece container adıdır; group servisinkidir (spring.kafka.consumer.group-id, ADR-0018).
     @KafkaListener(id = "product-changed", idIsGroup = false, topics = TopicNames.PRODUCT_CHANGED)
     public void onMessage(final String message) {
 

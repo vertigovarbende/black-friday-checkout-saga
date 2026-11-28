@@ -8,7 +8,7 @@ import com.deveyk.orderflow.order.domain.product.model.ProductSnapshot;
 import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.ProductChangedEventBuilder;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.messaging.contract.MoneyAmount;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
@@ -49,7 +49,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
                 .build();
 
         // When
-        publishEvent(TopicNames.PRODUCT_CHANGED, event);
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, event);
 
         // Then
         final ProductSnapshot product = awaitProductVersion(productId, 1L);
@@ -58,7 +58,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
 
         final InboxAssert.InboxRow inbox = InboxAssert.of(jdbcTemplate)
                 .processedOnce(ProductChangedKafkaListener.CONSUMER, event.metadata().eventId());
-        assertThat(inbox.eventType()).isEqualTo(EventTypeNames.PRODUCT_CHANGED);
+        assertThat(inbox.eventType()).isEqualTo(EventDefinitions.PRODUCT_CHANGED.eventType());
         assertThat(inbox.aggregateId()).isEqualTo(productId.toString());
     }
 
@@ -67,7 +67,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
     void givenExistingSnapshot_whenNewerVersionArrives_thenSnapshotUpdated() {
         // Given
         final UUID productId = UUID.randomUUID();
-        publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
                 .withValidValues()
                 .withProductId(productId)
                 .withProductVersion(1L)
@@ -75,7 +75,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
         awaitProductVersion(productId, 1L);
 
         // When
-        publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
                 .withValidValues()
                 .withProductId(productId)
                 .withName("Wireless Headphones Pro")
@@ -94,7 +94,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
     void givenNewerSnapshot_whenOlderVersionArrives_thenSkippedButRecorded() {
         // Given
         final UUID productId = UUID.randomUUID();
-        publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, new ProductChangedEventBuilder()
                 .withValidValues()
                 .withProductId(productId)
                 .withName("Wireless Headphones Pro")
@@ -109,7 +109,7 @@ class ProductChangedKafkaListenerIT extends OrderTestContainerConfiguration {
                 .build();
 
         // When
-        publishEvent(TopicNames.PRODUCT_CHANGED, older);
+        messagePublisher.publishEvent(TopicNames.PRODUCT_CHANGED, older);
 
         // Then
         awaitProcessed(older.metadata().eventId());

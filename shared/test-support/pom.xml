@@ -28,6 +28,11 @@
             <groupId>com.deveyk.orderflow</groupId>
             <artifactId>shared-observability</artifactId>
         </dependency>
+        <!-- messaging/MessagePublisher: OrderflowEvent zarfını yazar -->
+        <dependency>
+            <groupId>com.deveyk.orderflow</groupId>
+            <artifactId>shared-messaging</artifactId>
+        </dependency>
         <!-- Kod src/main'de olduğu için compile scope; servisler bu modülü zaten test scope'uyla ekler.
              JUnit, Mockito, AssertJ ve Logback (spring-boot-starter-logging üzerinden) buradan gelir. -->
         <dependency>

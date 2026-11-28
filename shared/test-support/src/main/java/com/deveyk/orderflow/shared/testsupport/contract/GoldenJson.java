@@ -22,13 +22,10 @@ public final class GoldenJson {
 
             if (in == null)
                 throw new IllegalArgumentException("Contract not found on classpath: " + path);
-
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
         } catch (final IOException e) {
-
             throw new UncheckedIOException(e);
-
         }
     }
 

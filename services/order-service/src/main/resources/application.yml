@@ -8,29 +8,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  # Ortak consumer / producer ayarları (group = servis adı, KIP-848, ErrorHandlingDeserializer, concurrency 3,
+  # observation) shared-kafka'dan varsayılan olarak gelir (KafkaDefaultsEnvironmentPostProcessor); burada ezilebilir.
   kafka:
     bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
-    # Servis başına tek consumer group; KIP-848 protokolü (ADR-0018). Değerler String olarak okunur,
-    # JSON'u listener çözer (EventJsonReader). ErrorHandlingDeserializer: çözülemeyen kayıt poll()'da patlamasın (deney 5.5).
-    consumer:
-      group-id: ${spring.application.name}
-      auto-offset-reset: earliest
-      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      properties:
-        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
-        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
-        group.protocol: consumer
-    # Sadece DLT'ye yazmak için. Çözülemeyen kayıt DLT'ye orijinal byte'larıyla gider; String ya da byte[] yazabilmeli.
-    producer:
-      key-serializer: org.springframework.kafka.support.serializer.StringOrBytesSerializer
-      value-serializer: org.springframework.kafka.support.serializer.StringOrBytesSerializer
-    # concurrency = partition sayısı: bloklayan retry sadece kendi partition'ını bekletir (deney 5.2).
-    listener:
-      concurrency: 3
-      observation-enabled: true
-    template:
-      observation-enabled: true
 
 server:
   port: 8081

@@ -1,9 +1,8 @@
 package com.deveyk.orderflow.order.testsupport.builder;
 
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
-import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.EventSourceNames;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
 import com.deveyk.orderflow.shared.messaging.contract.EventMetadata;
 import com.deveyk.orderflow.shared.messaging.contract.MoneyAmount;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
@@ -58,8 +57,8 @@ public class ProductChangedEventBuilder implements TestDataBuilder<OrderflowEven
 
     @Override
     public OrderflowEvent<ProductChangedPayload> build() {
-        final EventMetadata metadata = new EventMetadata(eventId, EventTypeNames.PRODUCT_CHANGED,
-                AggregateTypeNames.PRODUCT, String.valueOf(productId), EventSourceNames.PRODUCT_SERVICE, "1",
+        final EventMetadata metadata = new EventMetadata(eventId, EventDefinitions.PRODUCT_CHANGED.eventType(),
+                EventDefinitions.PRODUCT_CHANGED.aggregateType(), String.valueOf(productId), EventSourceNames.PRODUCT_SERVICE, "1",
                 OrderValidTestData.NOW, null, null);
 
         final ProductChangedPayload payload = ProductChangedPayload.builder()
