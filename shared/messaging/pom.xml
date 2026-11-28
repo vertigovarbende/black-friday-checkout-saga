@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>shared-messaging</artifactId>
-    <description>Event zarfı (OrderflowEvent, EventMetadata), EventBuilder, payload kontratları, isim sabitleri ve ortak Kafka ayarları.</description>
+    <description>Event zarfı (OrderflowEvent, EventMetadata), EventBuilder, EventJsonReader, payload kontratları ve mesaj tanımları (TopicNames, EventDefinitions). Taşıyıcıdan bağımsız; Kafka'ya özel olan shared-kafka'da.</description>
 
     <dependencies>
         <dependency>
@@ -31,6 +31,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!-- EventJsonReader -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <!-- payload kontratlarında @Builder (05 §5.1) -->
         <dependency>

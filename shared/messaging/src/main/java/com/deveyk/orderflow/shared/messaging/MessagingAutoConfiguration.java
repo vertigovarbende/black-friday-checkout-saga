@@ -7,6 +7,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Clock;
 
@@ -19,6 +20,15 @@ public class MessagingAutoConfiguration {
                                      final ObjectProvider<Clock> clock) {
 
         return new EventBuilder(traceContextProvider.getIfAvailable(() -> new TraceContextProvider(Tracer.NOOP)), clock.getIfAvailable(Clock::systemUTC));
+
+    }
+
+    // Servisin JsonMapper'ı (Spring Boot'un ayarlarıyla) kullanılır; yoksa varsayılan bir mapper.
+    @Bean
+    @ConditionalOnMissingBean
+    public EventJsonReader eventJsonReader(final ObjectProvider<JsonMapper> jsonMapper) {
+
+        return new EventJsonReader(jsonMapper.getIfAvailable(() -> JsonMapper.builder().build()));
 
     }
 

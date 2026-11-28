@@ -1,8 +1,9 @@
-package com.deveyk.orderflow.order.adapter.in.messaging;
+package com.deveyk.orderflow.shared.messaging;
 
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.messaging.contract.product.ProductChangedPayload;
-import com.deveyk.orderflow.shared.testsupport.contract.GoldenJson;
+import com.deveyk.orderflow.shared.messaging.exception.InvalidEventException;
+import com.deveyk.orderflow.shared.messaging.exception.MessagingErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +21,32 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EventJsonReaderTest {
 
-    private static final String CONTRACT = GoldenJson.read("product.changed.v1");
+    // shared-test-support'taki product.changed.v1 golden JSON'unun kopyası: shared modüller test-support'u kullanamaz
+    // (01 §3.3 kural 5).
+    private static final String ENVELOPE = """
+            {
+              "metadata": {
+                "eventId": "0198a1b2-0000-7000-8000-00000000e101",
+                "eventType": "ProductChanged",
+                "aggregateType": "product",
+                "aggregateId": "0198a1b2-0000-7000-8000-000000000101",
+                "source": "product-service",
+                "version": "1",
+                "occurredAt": "2026-11-27T10:00:00Z",
+                "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+                "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736"
+              },
+              "payload": {
+                "productId": "0198a1b2-0000-7000-8000-000000000101",
+                "name": "Wireless Headphones Pro",
+                "unitPrice": {
+                  "amount": "279.90",
+                  "currency": "TRY"
+                },
+                "productVersion": 3
+              }
+            }
+            """;
 
     private final EventJsonReader reader = new EventJsonReader(JsonMapper.builder().build());
 
@@ -28,7 +54,7 @@ class EventJsonReaderTest {
     @DisplayName("Geçerli zarf metadata ve payload'ıyla okunur")
     void givenValidEnvelope_whenRead_thenMetadataAndPayloadRead() {
         // When
-        final OrderflowEvent<ProductChangedPayload> event = reader.read(CONTRACT, ProductChangedPayload.class);
+        final OrderflowEvent<ProductChangedPayload> event = reader.read(ENVELOPE, ProductChangedPayload.class);
 
         // Then
         assertThat(event.metadata().eventId()).isEqualTo(UUID.fromString("0198a1b2-0000-7000-8000-00000000e101"));
@@ -41,7 +67,7 @@ class EventJsonReaderTest {
     @DisplayName("Bilinmeyen alanlar yok sayılır: üreticinin eklediği yeni alan tüketiciyi bozmaz")
     void givenUnknownFields_whenRead_thenIgnored() {
         // Given
-        final String json = CONTRACT.replace("\"productVersion\": 3", "\"productVersion\": 3, \"category\": \"audio\"");
+        final String json = ENVELOPE.replace("\"productVersion\": 3", "\"productVersion\": 3, \"category\": \"audio\"");
 
         // When
         final OrderflowEvent<ProductChangedPayload> event = reader.read(json, ProductChangedPayload.class);
@@ -76,9 +102,9 @@ class EventJsonReaderTest {
     private static Stream<Arguments> missingFields() {
         return Stream.of(
                 Arguments.of("metadata", "{\"payload\": {\"productVersion\": 1}}"),
-                Arguments.of("metadata.eventId", CONTRACT.replace("\"eventId\": \"0198a1b2-0000-7000-8000-00000000e101\",", "")),
-                Arguments.of("metadata.eventType", CONTRACT.replace("\"ProductChanged\"", "\" \"")),
-                Arguments.of("metadata.aggregateId", CONTRACT.replace("\"aggregateId\": \"0198a1b2-0000-7000-8000-000000000101\",", "")),
+                Arguments.of("metadata.eventId", ENVELOPE.replace("\"eventId\": \"0198a1b2-0000-7000-8000-00000000e101\",", "")),
+                Arguments.of("metadata.eventType", ENVELOPE.replace("\"ProductChanged\"", "\" \"")),
+                Arguments.of("metadata.aggregateId", ENVELOPE.replace("\"aggregateId\": \"0198a1b2-0000-7000-8000-000000000101\",", "")),
                 Arguments.of("payload", """
                         {"metadata": {"eventId": "0198a1b2-0000-7000-8000-00000000e101",
                                       "eventType": "ProductChanged",

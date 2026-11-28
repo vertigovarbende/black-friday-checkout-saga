@@ -22,31 +22,21 @@ public class EventBuilder {
         this.clock = clock;
     }
 
-    public <P> Draft<P> newEvent(final P payload) {
-        return new Draft<>(payload);
+    public <P> Draft<P> newEvent(final EventDefinition definition, final String aggregateId, final P payload) {
+        return new Draft<>(definition, aggregateId, payload);
     }
 
     public final class Draft<P> {
 
+        private final EventDefinition definition;
+        private final String aggregateId;
         private final P payload;
-        private String eventType;
-        private String aggregateType;
-        private String aggregateId;
         private String source;
 
-        private Draft(final P payload) {
-            this.payload = payload;
-        }
-
-        public Draft<P> withEventType(final String eventType) {
-            this.eventType = eventType;
-            return this;
-        }
-
-        public Draft<P> withAggregate(final String aggregateType, final String aggregateId) {
-            this.aggregateType = aggregateType;
+        private Draft(final EventDefinition definition, final String aggregateId, final P payload) {
+            this.definition = definition;
             this.aggregateId = aggregateId;
-            return this;
+            this.payload = payload;
         }
 
         public Draft<P> withSource(final String source) {
@@ -56,27 +46,25 @@ public class EventBuilder {
 
         public OrderflowEvent<P> build() {
 
-            if (payload == null) {
-                throw new IllegalStateException("Event payload is required");
-            }
+            if (definition == null)
+                throw new IllegalStateException("Event definition is required");
 
-            requireText(eventType, "eventType");
-            requireText(aggregateType, "aggregateType");
-            requireText(aggregateId, "aggregateId");
-            requireText(source, "source");
+            if (payload == null)
+                throw new IllegalStateException("Event payload is required");
+
+            if (aggregateId == null || aggregateId.isBlank())
+                throw new IllegalStateException("Event aggregateId is required");
+
+            if (source == null || source.isBlank())
+                throw new IllegalStateException("Event source is required");
 
             final String traceId = traceContextProvider.currentTraceId().orElse(null);
             final String correlationId = Optional.ofNullable(MDC.get(MdcKeys.CORRELATION_ID)).orElse(traceId);
 
-            final EventMetadata metadata = new EventMetadata(UuidV7.next(), eventType, aggregateType, aggregateId, source, SCHEMA_VERSION, clock.instant(), traceId, correlationId);
+            final EventMetadata metadata = new EventMetadata(UuidV7.next(), definition.eventType(), definition.aggregateType(), aggregateId, source, SCHEMA_VERSION, clock.instant(), traceId, correlationId);
 
             return new OrderflowEvent<>(metadata, payload);
         }
 
-        private static void requireText(final String value, final String field) {
-            if (value == null || value.isBlank()) {
-                throw new IllegalStateException("Event " + field + " is required");
-            }
-        }
     }
 }

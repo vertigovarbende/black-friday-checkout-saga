@@ -25,6 +25,7 @@
         <module>shared/messaging</module>
         <module>shared/outbox</module>
         <module>shared/inbox</module>
+        <module>shared/kafka</module>
         <module>shared/datasource-routing</module>
         <module>shared/web</module>
         <module>shared/persistence</module>
@@ -80,6 +81,11 @@
             <dependency>
                 <groupId>com.deveyk.orderflow</groupId>
                 <artifactId>shared-inbox</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.deveyk.orderflow</groupId>
+                <artifactId>shared-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -4,8 +4,7 @@ import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.domain.order.model.Order;
 import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
-import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.observability.MdcKeys;
 import com.deveyk.orderflow.shared.testsupport.messaging.OutboxAssert;
@@ -54,9 +53,9 @@ class OrderDomainEventAdapterIT extends OrderTestContainerConfiguration {
         }
 
         // Then
-        final OutboxAssert.OutboxRow row = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventTypeNames.ORDER_CREATED);
+        final OutboxAssert.OutboxRow row = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventDefinitions.ORDER_CREATED.eventType());
         assertThat(row.topic()).isEqualTo(TopicNames.ORDER_CREATED);
-        assertThat(row.aggregateType()).isEqualTo(AggregateTypeNames.ORDER);
+        assertThat(row.aggregateType()).isEqualTo(EventDefinitions.ORDER_CREATED.aggregateType());
         assertThat(row.traceparent())
                 .startsWith("00-" + span.context().traceId() + "-" + span.context().spanId() + "-");
         assertThat(Integer.parseInt(row.traceparent().substring(row.traceparent().length() - 2), 16) & 0x01)

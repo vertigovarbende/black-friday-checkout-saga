@@ -38,7 +38,7 @@ class EventBuilderTest {
     }
 
     @Test
-    @DisplayName("Zarf verilen payload, tip, aggregate ve kaynakla; saatten gelen zaman ve yeni bir UUIDv7 eventId ile kurulur")
+    @DisplayName("Zarf tanımdan gelen tip ve aggregate tipiyle, verilen aggregate id, payload ve kaynakla; saatten gelen zaman ve yeni bir UUIDv7 eventId ile kurulur")
     void givenAllFields_whenBuild_thenEnvelopeFromFieldsAndClock() {
         // Given
         final EventBuilder eventBuilder = new EventBuilder(new TraceContextProvider(Tracer.NOOP), CLOCK);
@@ -129,22 +129,20 @@ class EventBuilderTest {
     static Stream<Arguments> incompleteDrafts() {
         final EventBuilder eventBuilder = new EventBuilder(new TraceContextProvider(Tracer.NOOP), CLOCK);
         return Stream.of(
-                Arguments.of("payload", eventBuilder.<String>newEvent(null)
-                        .withEventType("OrderCreated").withAggregate("order", "order-42").withSource("order-service")),
-                Arguments.of("eventType", eventBuilder.newEvent(PAYLOAD)
-                        .withAggregate("order", "order-42").withSource("order-service")),
-                Arguments.of("eventType", completeDraft(eventBuilder).withEventType(" ")),
-                Arguments.of("aggregateType", completeDraft(eventBuilder).withAggregate(null, "order-42")),
-                Arguments.of("aggregateId", completeDraft(eventBuilder).withAggregate("order", "")),
-                Arguments.of("source", eventBuilder.newEvent(PAYLOAD)
-                        .withEventType("OrderCreated").withAggregate("order", "order-42"))
+                Arguments.of("definition", eventBuilder.newEvent(null, "order-42", PAYLOAD).withSource("order-service")),
+                Arguments.of("payload", eventBuilder.<String>newEvent(EventDefinitions.ORDER_CREATED, "order-42", null)
+                        .withSource("order-service")),
+                Arguments.of("aggregateId", eventBuilder.newEvent(EventDefinitions.ORDER_CREATED, null, PAYLOAD)
+                        .withSource("order-service")),
+                Arguments.of("aggregateId", eventBuilder.newEvent(EventDefinitions.ORDER_CREATED, " ", PAYLOAD)
+                        .withSource("order-service")),
+                Arguments.of("source", eventBuilder.newEvent(EventDefinitions.ORDER_CREATED, "order-42", PAYLOAD)),
+                Arguments.of("source", completeDraft(eventBuilder).withSource(""))
         );
     }
 
     private static EventBuilder.Draft<String> completeDraft(final EventBuilder eventBuilder) {
-        return eventBuilder.newEvent(PAYLOAD)
-                .withEventType("OrderCreated")
-                .withAggregate("order", "order-42")
+        return eventBuilder.newEvent(EventDefinitions.ORDER_CREATED, "order-42", PAYLOAD)
                 .withSource("order-service");
     }
 

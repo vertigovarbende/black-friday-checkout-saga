@@ -6,9 +6,8 @@ import com.deveyk.orderflow.order.domain.order.model.OrderId;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.OrderLineBuilder;
-import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.EventSourceNames;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
 import com.deveyk.orderflow.shared.messaging.contract.EventMetadata;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.testsupport.contract.GoldenJson;
@@ -42,8 +41,8 @@ class OrderCreatedContractTest {
                                 .build()))
                 .build();
 
-        final EventMetadata metadata = new EventMetadata(EVENT_ID, EventTypeNames.ORDER_CREATED,
-                AggregateTypeNames.ORDER, ORDER_ID.value().toString(), EventSourceNames.ORDER_SERVICE, "1",
+        final EventMetadata metadata = new EventMetadata(EVENT_ID, EventDefinitions.ORDER_CREATED.eventType(),
+                EventDefinitions.ORDER_CREATED.aggregateType(), ORDER_ID.value().toString(), EventSourceNames.ORDER_SERVICE, "1",
                 OrderValidTestData.NOW, "4bf92f3577b34da6a3ce929d0e0e4736", "black-friday-checkout-1");
 
         // When

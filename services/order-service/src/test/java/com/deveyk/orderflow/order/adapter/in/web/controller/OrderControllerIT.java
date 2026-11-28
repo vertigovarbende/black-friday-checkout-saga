@@ -13,7 +13,7 @@ import com.deveyk.orderflow.order.testsupport.OrderTestContainerConfiguration;
 import com.deveyk.orderflow.order.testsupport.OrderValidTestData;
 import com.deveyk.orderflow.order.testsupport.builder.OrderBuilder;
 import com.deveyk.orderflow.order.testsupport.builder.PlaceOrderRequestBuilder;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.observability.OrderflowHeaders;
 import com.deveyk.orderflow.shared.testsupport.messaging.OutboxAssert;
@@ -79,7 +79,7 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
                         tuple(OrderValidTestData.Product.PRODUCT_ID, OrderValidTestData.Product.NAME, OrderValidTestData.Product.UNIT_PRICE_MONEY, new Quantity(2)),
                         tuple(OrderValidTestData.SecondProduct.PRODUCT_ID, OrderValidTestData.SecondProduct.NAME, OrderValidTestData.SecondProduct.UNIT_PRICE_MONEY, new Quantity(1))
                 );
-        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId.toString(), EventTypeNames.ORDER_CREATED);
+        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId.toString(), EventDefinitions.ORDER_CREATED.eventType());
         assertThat(event.topic()).isEqualTo(TopicNames.ORDER_CREATED);
     }
 
@@ -173,7 +173,7 @@ class OrderControllerIT extends OrderTestContainerConfiguration {
         // Then
         final String orderId = JsonPath.read(result.getResponse().getContentAsString(), "$.orderId");
         final String traceId = result.getResponse().getHeader(OrderflowHeaders.TRACE_ID);
-        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventTypeNames.ORDER_CREATED);
+        final OutboxAssert.OutboxRow event = OutboxAssert.of(jdbcTemplate).hasEvent(orderId, EventDefinitions.ORDER_CREATED.eventType());
         assertThat(JsonPath.<String>read(event.payload(), "$.metadata.correlationId")).isEqualTo("black-friday-checkout-1");
         assertThat(JsonPath.<String>read(event.payload(), "$.metadata.traceId")).isEqualTo(traceId);
         assertThat(event.traceparent()).startsWith("00-" + traceId + "-");

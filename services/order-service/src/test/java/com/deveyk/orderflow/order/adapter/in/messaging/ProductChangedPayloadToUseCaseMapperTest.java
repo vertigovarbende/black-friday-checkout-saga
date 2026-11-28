@@ -9,6 +9,8 @@ import com.deveyk.orderflow.shared.domain.exception.DomainValidationException;
 import com.deveyk.orderflow.shared.domain.exception.SharedErrorCode;
 import com.deveyk.orderflow.shared.messaging.contract.MoneyAmount;
 import com.deveyk.orderflow.shared.messaging.contract.product.ProductChangedPayload;
+import com.deveyk.orderflow.shared.messaging.exception.InvalidEventException;
+import com.deveyk.orderflow.shared.messaging.exception.MessagingErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

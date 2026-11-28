@@ -2,11 +2,9 @@ package com.deveyk.orderflow.order.adapter.out.messaging;
 
 import com.deveyk.orderflow.order.application.order.port.OrderDomainEventPort;
 import com.deveyk.orderflow.order.domain.order.model.Order;
-import com.deveyk.orderflow.shared.messaging.AggregateTypeNames;
 import com.deveyk.orderflow.shared.messaging.EventBuilder;
+import com.deveyk.orderflow.shared.messaging.EventDefinitions;
 import com.deveyk.orderflow.shared.messaging.EventSourceNames;
-import com.deveyk.orderflow.shared.messaging.EventTypeNames;
-import com.deveyk.orderflow.shared.messaging.TopicNames;
 import com.deveyk.orderflow.shared.messaging.contract.OrderflowEvent;
 import com.deveyk.orderflow.shared.messaging.contract.order.OrderCreatedPayload;
 import com.deveyk.orderflow.shared.outbox.port.OutboxEventPort;
@@ -24,12 +22,10 @@ class OrderDomainEventAdapter implements OrderDomainEventPort {
     public void publishOrderCreated(final Order order) {
 
         final OrderflowEvent<OrderCreatedPayload> event = eventBuilder
-                .newEvent(OrderToOrderCreatedPayloadMapper.toPayload(order))
-                .withEventType(EventTypeNames.ORDER_CREATED)
-                .withAggregate(AggregateTypeNames.ORDER, order.getId().value().toString())
+                .newEvent(EventDefinitions.ORDER_CREATED, order.getId().value().toString(), OrderToOrderCreatedPayloadMapper.toPayload(order))
                 .withSource(EventSourceNames.ORDER_SERVICE)
                 .build();
 
-        outboxEventPort.append(TopicNames.ORDER_CREATED, event);
+        outboxEventPort.append(EventDefinitions.ORDER_CREATED.topic(), event);
     }
 }
