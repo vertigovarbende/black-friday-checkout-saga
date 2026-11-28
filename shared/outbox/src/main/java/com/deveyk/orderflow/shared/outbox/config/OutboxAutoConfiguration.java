@@ -4,7 +4,6 @@ import com.deveyk.orderflow.shared.observability.ObservabilityAutoConfiguration;
 import com.deveyk.orderflow.shared.observability.TraceContextProvider;
 import com.deveyk.orderflow.shared.outbox.adapter.OutboxEventAdapter;
 import com.deveyk.orderflow.shared.outbox.cleanup.OutboxCleanupJob;
-import com.deveyk.orderflow.shared.outbox.jpa.entity.OutboxEventEntity;
 import com.deveyk.orderflow.shared.outbox.jpa.repository.OutboxEventRepository;
 import com.deveyk.orderflow.shared.outbox.port.OutboxEventPort;
 import io.micrometer.tracing.Tracer;
@@ -23,12 +22,10 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Clock;
 
-// Entity ve repository servislerin taramasına @AutoConfigurationPackage ile eklenir. Sadece jpa package'ları eklenir;
-// config'in kendi package'ı taranmaz.
 @AutoConfiguration(
         before = {HibernateJpaAutoConfiguration.class, DataJpaRepositoriesAutoConfiguration.class},
         after = ObservabilityAutoConfiguration.class)
-@AutoConfigurationPackage(basePackageClasses = {OutboxEventEntity.class, OutboxEventRepository.class})
+@AutoConfigurationPackage(basePackages = "com.deveyk.orderflow.shared.outbox")
 @EnableConfigurationProperties(OutboxProperties.class)
 public class OutboxAutoConfiguration {
 
