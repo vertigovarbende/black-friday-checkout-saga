@@ -7,6 +7,7 @@ import com.deveyk.orderflow.shared.domain.exception.OrderflowInvalidStateExcepti
 import com.deveyk.orderflow.shared.domain.exception.OrderflowResourceNotFoundException;
 import com.deveyk.orderflow.shared.domain.exception.OrderflowTechnicalException;
 import com.deveyk.orderflow.shared.domain.exception.OrderflowValidationException;
+import com.deveyk.orderflow.shared.observability.ErrorFamily;
 import com.deveyk.orderflow.shared.observability.TraceContextProvider;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -45,15 +46,6 @@ public class GlobalExceptionHandler {
     static final String ERROR_COUNTER = "orderflow.errors";
     static final String RETRY_AFTER_SECONDS = "5";
 
-    // ----- families -----
-    private static final String VALIDATION = "validation";
-    private static final String NOT_FOUND = "not_found";
-    private static final String CONFLICT = "conflict";
-    private static final String INVALID_STATE = "invalid_state";
-    private static final String BUSINESS_RULE = "business_rule";
-    private static final String TECHNICAL = "technical";
-    private static final String UNEXPECTED = "unexpected";
-
     private final TraceContextProvider traceContextProvider;
     private final MeterRegistry meterRegistry;
 
@@ -73,7 +65,7 @@ public class GlobalExceptionHandler {
                                                                final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.subErrors(exception.getBindingResult().getFieldErrors()), CommonErrorCode.VALIDATION_ERROR, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -84,7 +76,7 @@ public class GlobalExceptionHandler {
                                                             final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.subErrors(exception.getConstraintViolations()), CommonErrorCode.VALIDATION_ERROR, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -95,7 +87,7 @@ public class GlobalExceptionHandler {
                                                                 final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.VALIDATION_ERROR, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -106,7 +98,7 @@ public class GlobalExceptionHandler {
                                                                    final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.subErrors(exception), CommonErrorCode.TYPE_MISMATCH, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -117,7 +109,7 @@ public class GlobalExceptionHandler {
                                                                final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.MALFORMED_REQUEST, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -128,7 +120,7 @@ public class GlobalExceptionHandler {
                                                              final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.MISSING_REQUEST_HEADER, request, exception.getHeaderName());
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -139,7 +131,7 @@ public class GlobalExceptionHandler {
                                                         final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.RESOURCE_NOT_FOUND, request);
-        this.logClientError(exception, errorResponse, NOT_FOUND);
+        this.logClientError(exception, errorResponse, ErrorFamily.NOT_FOUND);
         return errorResponse;
 
     }
@@ -150,7 +142,7 @@ public class GlobalExceptionHandler {
                                                                       final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.METHOD_NOT_ALLOWED, request, exception.getMethod());
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -161,7 +153,7 @@ public class GlobalExceptionHandler {
                                                                   final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, request, String.valueOf(exception.getContentType()));
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -172,7 +164,7 @@ public class GlobalExceptionHandler {
                                                                final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.DATA_CONFLICT, request);
-        this.logClientError(exception, errorResponse, CONFLICT);
+        this.logClientError(exception, errorResponse, ErrorFamily.CONFLICT);
         return errorResponse;
 
     }
@@ -183,7 +175,7 @@ public class GlobalExceptionHandler {
                                                                  final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.CONCURRENT_MODIFICATION, request);
-        this.logClientError(exception, errorResponse, CONFLICT);
+        this.logClientError(exception, errorResponse, ErrorFamily.CONFLICT);
         return errorResponse;
 
     }
@@ -197,7 +189,7 @@ public class GlobalExceptionHandler {
 
         response.setHeader(HttpHeaders.RETRY_AFTER, RETRY_AFTER_SECONDS);
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.SERVICE_UNAVAILABLE, request);
-        this.logServerError(exception, errorResponse, TECHNICAL);
+        this.logServerError(exception, errorResponse, ErrorFamily.TECHNICAL);
         return errorResponse;
 
     }
@@ -210,7 +202,7 @@ public class GlobalExceptionHandler {
                                                             final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logClientError(exception, errorResponse, VALIDATION);
+        this.logClientError(exception, errorResponse, ErrorFamily.VALIDATION);
         return errorResponse;
 
     }
@@ -221,7 +213,7 @@ public class GlobalExceptionHandler {
                                                                   final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logClientError(exception, errorResponse, NOT_FOUND);
+        this.logClientError(exception, errorResponse, ErrorFamily.NOT_FOUND);
         return errorResponse;
 
     }
@@ -232,7 +224,7 @@ public class GlobalExceptionHandler {
                                                           final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logClientError(exception, errorResponse, CONFLICT);
+        this.logClientError(exception, errorResponse, ErrorFamily.CONFLICT);
         return errorResponse;
 
     }
@@ -243,7 +235,7 @@ public class GlobalExceptionHandler {
                                                               final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logClientError(exception, errorResponse, INVALID_STATE);
+        this.logClientError(exception, errorResponse, ErrorFamily.INVALID_STATE);
         return errorResponse;
 
     }
@@ -254,7 +246,7 @@ public class GlobalExceptionHandler {
                                                               final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logClientError(exception, errorResponse, BUSINESS_RULE);
+        this.logClientError(exception, errorResponse, ErrorFamily.BUSINESS_RULE);
         return errorResponse;
 
     }
@@ -267,7 +259,7 @@ public class GlobalExceptionHandler {
 
         response.setHeader(HttpHeaders.RETRY_AFTER, RETRY_AFTER_SECONDS);
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logServerError(exception, errorResponse, TECHNICAL);
+        this.logServerError(exception, errorResponse, ErrorFamily.TECHNICAL);
         return errorResponse;
 
     }
@@ -279,7 +271,7 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleOrderflowException(final OrderflowException exception, final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.toErrorResponse(exception, request);
-        this.logServerError(exception, errorResponse, UNEXPECTED);
+        this.logServerError(exception, errorResponse, ErrorFamily.UNEXPECTED);
         return errorResponse;
 
     }
@@ -289,7 +281,7 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleException(final Exception exception, final HttpServletRequest request) {
 
         final ErrorResponse errorResponse = this.common(ErrorResponse.builder(), CommonErrorCode.INTERNAL_SERVER_ERROR, request);
-        this.logServerError(exception, errorResponse, UNEXPECTED);
+        this.logServerError(exception, errorResponse, ErrorFamily.UNEXPECTED);
         return errorResponse;
 
     }

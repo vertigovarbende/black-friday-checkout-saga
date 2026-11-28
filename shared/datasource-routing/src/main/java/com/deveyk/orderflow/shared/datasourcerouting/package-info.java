@@ -1,6 +1,7 @@
 /**
- * shared-datasource-routing: İki Hikari pool, routing DataSource ve LazyConnectionDataSourceProxy.
+ * shared-datasource-routing: primary ve replica için iki Hikari pool; read-only transaction'ları
+ * replica'ya yönlendiren LazyConnectionDataSourceProxy.
  *
- * Ayrıntı: docs/decisions/01-paket-yapisi-kararlari.md §3.
+ * Ayrıntı: docs/adr/0004-tek-postgres-cluster-primary-replica.md
  */
 package com.deveyk.orderflow.shared.datasourcerouting;

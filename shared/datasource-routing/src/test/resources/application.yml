@@ -1,0 +1,9 @@
+orderflow:
+  datasource:
+    primary:
+      pool-name: test-primary
+      maximum-pool-size: 2
+    replica:
+      pool-name: test-replica
+      maximum-pool-size: 2
+      read-only: true

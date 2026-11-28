@@ -16,3 +16,6 @@ Uygulama `localhost:8100`'de açılır. İkinci bir instance için: `PORT=8101 m
 | 3 | Key → partition → sıralama; farklı topic'ler arasında sıra; hot partition |
 | 4 | Consumer group, rebalance, offset commit, at-least-once; yavaş consumer |
 | 5 | Bloklayan retry + DLT; bozuk mesaj (poison pill) |
+| 6 | Dual write: DB + `KafkaTemplate` ile doğrudan yol, çökme senaryoları; outbox yoluyla karşılaştırma (Faz 2) |
+
+Deney 6'dan beri uygulama Postgres'teki `experiments` DB'sine bağlanır (tablo `schema.sql` ile açılır). DB, init script'le yeni volume'de kendiliğinden gelir; eski bir volume'de bir kez elle açılır (`docs/setup/local-development.md` §4.1).

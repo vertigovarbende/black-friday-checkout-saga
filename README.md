@@ -4,13 +4,13 @@ Black Friday yükü altında çalışan bir e-ticaret sipariş sistemi üzerinde
 
 Kullanıcı sipariş verir, stok ayrılır, ödeme alınır ve sipariş tamamlanır. Bir adım başarısız olursa önceki adımlar telafi edilir. Aynı anda canlı bir panelde satışlar akar. Bu akışın her parçası, öğrenilecek bir konuyu gerçekten yaşatacak şekilde tasarlandı: Kafka, outbox / inbox, orkestrasyonlu saga, Debezium, Redis, HikariCP ile primary / replica, observability, yük ve chaos testleri.
 
-> **Durum:** Tasarım tamamlandı, geliştirme Faz 0'dan başlıyor. Kararlar `docs/decisions/` ve `docs/adr/` altında; sıra `docs/ROADMAP.md`'de.
-
 ---
 
 ## Mimari bir bakışta
 
-[`docs/diagrams/blackfriday.excalidraw`](docs/diagrams/blackfriday.excalidraw) (excalidraw.com → Open).
+![Black Friday: servisler, Kafka, Postgres, Redis ve checkout saga](docs/diagrams/blackfriday.png)
+
+Kaynağı: [`docs/diagrams/blackfriday.excalidraw`](docs/diagrams/blackfriday.excalidraw) (excalidraw.com → Open).
 
 | Servis | Sahip olduğu veri | Görevi |
 |---|---|---|

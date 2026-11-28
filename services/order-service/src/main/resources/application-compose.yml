@@ -1,0 +1,23 @@
+spring:
+  kafka:
+    bootstrap-servers: kafka-1:29092,kafka-2:29092,kafka-3:29092
+
+orderflow:
+  datasource:
+    primary:
+      jdbc-url: jdbc:postgresql://postgres-primary:5432/order_service
+    replica:
+      jdbc-url: jdbc:postgresql://postgres-replica:5432/order_service
+
+# JSON log: stdout → Alloy → Loki (08 §3).
+logging:
+  structured:
+    format:
+      console: logstash
+
+management:
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://tempo:4318/v1/traces
