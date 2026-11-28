@@ -2,7 +2,6 @@ package com.deveyk.orderflow.shared.inbox.config;
 
 import com.deveyk.orderflow.shared.inbox.adapter.InboxEventAdapter;
 import com.deveyk.orderflow.shared.inbox.cleanup.InboxCleanupJob;
-import com.deveyk.orderflow.shared.inbox.jpa.entity.InboxEventEntity;
 import com.deveyk.orderflow.shared.inbox.jpa.repository.InboxEventRepository;
 import com.deveyk.orderflow.shared.inbox.port.InboxEventPort;
 import com.deveyk.orderflow.shared.inbox.support.InboxProcessor;
@@ -23,12 +22,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.Clock;
 
-// Entity ve repository servislerin taramasına @AutoConfigurationPackage ile eklenir (shared-outbox'taki gibi). Sadece jpa
-// package'ları eklenir; config'in kendi package'ı taranmaz.
 @AutoConfiguration(
         before = {HibernateJpaAutoConfiguration.class, DataJpaRepositoriesAutoConfiguration.class},
         after = ObservabilityAutoConfiguration.class)
-@AutoConfigurationPackage(basePackageClasses = {InboxEventEntity.class, InboxEventRepository.class})
+@AutoConfigurationPackage(basePackages = "com.deveyk.orderflow.shared.inbox")
 @EnableConfigurationProperties(InboxProperties.class)
 public class InboxAutoConfiguration {
 
