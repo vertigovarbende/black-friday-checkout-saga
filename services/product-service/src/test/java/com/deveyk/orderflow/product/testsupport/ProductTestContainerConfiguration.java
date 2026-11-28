@@ -1,0 +1,64 @@
+package com.deveyk.orderflow.product.testsupport;
+
+import com.deveyk.orderflow.shared.testsupport.LogTrackerConfiguration;
+import com.deveyk.orderflow.shared.testsupport.container.OrderflowContainers;
+import com.deveyk.orderflow.shared.testsupport.web.OrderflowMockMvc;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.lifecycle.Startables;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+
+import java.util.List;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureTracing
+@Import(ProductDatabaseCleaner.class)
+public abstract class ProductTestContainerConfiguration extends LogTrackerConfiguration {
+
+    protected static final PostgreSQLContainer POSTGRES = OrderflowContainers.postgres("product_service");
+    protected static final KafkaContainer KAFKA = OrderflowContainers.kafka();
+
+    static {
+        Startables.deepStart(POSTGRES, KAFKA).join();
+    }
+
+    @DynamicPropertySource
+    static void overrideProperties(final DynamicPropertyRegistry registry) {
+
+        for (final String pool : List.of("primary", "replica")) {
+            registry.add("orderflow.datasource." + pool + ".jdbc-url", POSTGRES::getJdbcUrl);
+            registry.add("orderflow.datasource." + pool + ".username", POSTGRES::getUsername);
+            registry.add("orderflow.datasource." + pool + ".password", POSTGRES::getPassword);
+        }
+
+        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+        registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+        registry.add("orderflow.kafka.topics.replication-factor", () -> "1");   // Tek broker: topic'ler RF 1 ile açılır.
+        registry.add("orderflow.kafka.topics.min-insync-replicas", () -> "1");
+        registry.add("management.tracing.export.otlp.enabled", () -> "false");
+    }
+
+    @Autowired
+    private ProductDatabaseCleaner databaseCleaner;
+
+    protected OrderflowMockMvc orderflowMockMvc;
+
+    @BeforeEach
+    void cleanDatabase() {
+        databaseCleaner.clean();
+    }
+
+    @BeforeEach
+    void setUpOrderflowMockMvc(@Autowired final MockMvc mockMvc) {
+        orderflowMockMvc = new OrderflowMockMvc(mockMvc);
+    }
+}

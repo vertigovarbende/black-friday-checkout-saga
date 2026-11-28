@@ -34,6 +34,11 @@ public enum CommonDomainErrorCode implements ErrorCode {
             "PRD_105",
             "QUANTITY_NEGATIVE",
             "Quantity cannot be negative: {0}"
+    ),
+    CURRENCY_UNKNOWN(
+            "PRD_106",
+            "CURRENCY_UNKNOWN",
+            "Unknown currency: {0}"
     );
 
     private final String code;
